@@ -1,0 +1,62 @@
+/* Existing cashier_checkout.css content + new styles */
+
+.selected-customer-section {
+  background: rgba(255,255,255,0.8);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+  border: 2px solid rgba(0,0,0,0.08);
+  backdrop-filter: blur(10px);
+}
+
+.customer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.customer-header i {
+  color: var(--primary, #3b82f6);
+  font-size: 20px;
+}
+
+.customer-header span {
+  font-weight: 600;
+  font-size: 16px;
+  color: #1e293b;
+}
+
+.change-customer-btn {
+  margin-left: auto;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--secondary);
+  color: var(--primary);
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.change-customer-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+
+.customer-details {
+  padding-left: 32px;
+}
+
+.customer-name-display {
+  font-weight: 700;
+  font-size: 18px;
+  color: #1e293b;
+  margin-bottom: 4px;
+}
+
+.customer-phone-display {
+  font-size: 15px;
+  color: #64748b;
+  font-weight: 500;}

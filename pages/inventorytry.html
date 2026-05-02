@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS - Manage Items</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        
+        :root {
+            --primary: 243 75 107;
+        }
+        
+        .tail-container {
+            font-family: 'Inter', system_ui, sans-serif;
+        }
+        
+        .logo-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .category-pill {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .category-pill:hover {
+            transform: translateX(4px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        .item-card {
+            transition: all 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .item-card:hover {
+            transform: translateY(-8px) scale(1.03);
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+        }
+
+        .modal {
+            animation: modalPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes modalPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(40px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .dotted-card {
+            border: 3px dashed #9ca3af;
+        }
+        
+        .grid-bg {
+            background-image: 
+                linear-gradient(to right, #f3e8ff 1px, transparent 1px),
+                linear-gradient(to bottom, #f3e8ff 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+    </style>
+</head>
+<body class="tail-container bg-zinc-50">
+    <div class="flex h-screen overflow-hidden">
+        <!-- SIDEBAR NAV -->
+        <div class="w-72 bg-[#4A6CF7] text-white flex flex-col">
+            <!-- Logo -->
+            <div class="px-8 pt-8 pb-6 border-b border-white/20">
+                <div class="flex items-center gap-x-3">
+                    <div class="w-10 h-10 bg-white rounded-2xl flex items-center justify-center text-[#4A6CF7] text-3xl font-bold logo-font">P</div>
+                    <div>
+                        <span class="text-3xl font-semibold tracking-tighter logo-font">POSify</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu -->
+            <div class="flex-1 px-4 py-6 space-y-1">
+                <a href="#" onclick="fakeNavClick(this)" class="flex items-center gap-x-3 px-6 py-4 rounded-3xl hover:bg-white/10 transition-colors">
+                    <span class="font-medium">Dashboard</span>
+                </a>
+                <a href="#" onclick="fakeNavClick(this)" class="flex items-center gap-x-3 px-6 py-4 rounded-3xl hover:bg-white/10 transition-colors">
+                    <span class="font-medium">Employee</span>
+                </a>
+                <a href="#" onclick="fakeNavClick(this)" class="flex items-center gap-x-3 px-6 py-4 rounded-3xl hover:bg-white/10 transition-colors">
+                    <span class="font-medium">Overview</span>
+                </a>
+                <a href="#" onclick="fakeNavClick(this)" class="flex items-center gap-x-3 px-6 py-4 rounded-3xl bg-white/20 text-white font-semibold">
+                    <span class="font-medium">Inventory</span>
+                </a>
+                <a href="#" onclick="fakeNavClick(this)" class="flex items-center gap-x-3 px-6 py-4 rounded-3xl hover:bg-white/10 transition-colors">
+                    <span class="font-medium">Settings</span>
+                </a>
+            </div>
+
+            <!-- Logout -->
+            <div class="p-4 border-t border-white/20">
+                <a href="#" onclick="fakeNavClick(this)" class="flex items-center gap-x-3 px-6 py-4 rounded-3xl hover:bg-white/10 transition-colors">
+                    <span class="font-medium">Logout</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 flex flex-col">
+            <!-- TOP BAR -->
+            <div class="h-16 bg-[#F3E8FF] border-b flex items-center px-8">
+                <div class="flex-1"></div>
+                
+                <!-- User Profile -->
+                <div class="flex items-center gap-x-3">
+                    <div class="w-9 h-9 bg-white rounded-2xl shadow flex items-center justify-center overflow-hidden">
+                        👨‍💼
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-gray-800">Alex Rivera</div>
+                        <div class="text-xs text-gray-500 -mt-0.5">Manager</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BODY -->
+            <div class="flex flex-1 overflow-hidden">
+                
+                <!-- CATEGORIES PANEL -->
+                <div class="w-80 bg-[#F3E8FF] border-r flex flex-col">
+                    <div class="px-6 pt-6 pb-4 flex items-center justify-between">
+                        <h2 class="text-2xl font-semibold text-gray-800">Category</h2>
+                        <button onclick="showAddCategoryModal()" 
+                                class="w-10 h-10 bg-white hover:bg-[#4A6CF7] hover:text-white text-[#4A6CF7] rounded-2xl flex items-center justify-center text-3xl shadow-md transition-all active:scale-95">
+                            +
+                        </button>
+                    </div>
+                    
+                    <div id="categories-list" class="flex-1 px-4 py-2 overflow-y-auto space-y-3 custom-scroll">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- MANAGE ITEMS AREA -->
+                <div class="flex-1 flex flex-col">
+                    <!-- Header -->
+                    <div class="h-16 border-b bg-white px-8 flex items-center justify-between">
+                        <h1 class="text-3xl font-semibold text-gray-800">Manage items</h1>
+                        
+                        <div class="flex items-center gap-x-6">
+                            <!-- Search -->
+                            <div class="relative">
+                                <input id="search-input" 
+                                       onkeyup="handleSearch(this.value)"
+                                       type="text" 
+                                       placeholder="Search item..." 
+                                       class="bg-[#F3E8FF] focus:bg-white border border-transparent focus:border-[#4A6CF7] w-80 h-12 pl-12 rounded-3xl text-sm outline-none transition-all">
+                                <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-xl">🔍</div>
+                            </div>
+                            
+                            <!-- Add Item Button -->
+                            <button onclick="showAddItemModal()" 
+                                    class="w-11 h-11 bg-[#4A6CF7] hover:bg-[#3b5bd6] text-white rounded-3xl flex items-center justify-center text-3xl shadow-lg transition-all active:scale-95">
+                                +
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Items Grid -->
+                    <div id="items-container" class="flex-1 p-8 overflow-auto grid-bg">
+                        <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-8">
+                            <!-- Dynamically populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD CATEGORY MODAL -->
+    <div id="add-category-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="modal bg-white w-full max-w-md mx-4 rounded-3xl shadow-2xl">
+            <div class="px-8 pt-8 pb-4">
+                <h2 class="text-2xl font-semibold text-gray-800">New Category</h2>
+                <p class="text-gray-500 text-sm mt-1">Give your category a name</p>
+                
+                <div class="mt-8">
+                    <input id="add-category-name" 
+                           type="text" 
+                           placeholder="e.g. Beverages" 
+                           class="w-full px-6 py-5 rounded-2xl border border-gray-200 focus:border-[#4A6CF7] outline-none text-lg">
+                </div>
+            </div>
+            
+            <div class="flex border-t">
+                <button onclick="hideModal('add-category-modal')" 
+                        class="flex-1 py-6 text-gray-500 font-medium hover:bg-gray-100 rounded-bl-3xl transition-colors">
+                    Cancel
+                </button>
+                <button onclick="createNewCategory()" 
+                        class="flex-1 py-6 bg-[#4A6CF7] text-white font-semibold rounded-br-3xl hover:bg-[#3b5bd6] transition-colors">
+                    Create Category
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT CATEGORY MODAL -->
+    <div id="edit-category-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="modal bg-white w-full max-w-md mx-4 rounded-3xl shadow-2xl">
+            <div class="px-8 pt-8 pb-4">
+                <h2 class="text-2xl font-semibold text-gray-800">Edit Category</h2>
+                
+                <div class="mt-8">
+                    <input id="edit-category-name" 
+                           type="text" 
+                           class="w-full px-6 py-5 rounded-2xl border border-gray-200 focus:border-[#4A6CF7] outline-none text-lg">
+                </div>
+            </div>
+            
+            <div class="flex border-t">
+                <button onclick="deleteCurrentCategory()" 
+                        class="flex-1 py-6 text-red-500 font-medium hover:bg-red-50 rounded-bl-3xl transition-colors">
+                    Delete Category
+                </button>
+                <button onclick="hideModal('edit-category-modal')" 
+                        class="flex-1 py-6 text-gray-500 font-medium hover:bg-gray-100 transition-colors">
+                    Cancel
+                </button>
+                <button onclick="saveCategoryEdit()" 
+                        class="flex-1 py-6 bg-[#4A6CF7] text-white font-semibold rounded-br-3xl hover:bg-[#3b5bd6] transition-colors">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADD ITEM MODAL -->
+    <div id="add-item-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="modal bg-white w-full max-w-lg mx-4 rounded-3xl shadow-2xl">
+            <div class="px-8 pt-8">
+                <h2 class="text-2xl font-semibold">Add New Item</h2>
+                <p id="add-item-category-name" class="text-[#4A6CF7] text-sm mt-1 font-medium"></p>
+            </div>
+            
+            <div class="px-8 py-6 space-y-6">
+                <div>
+                    <label class="text-xs font-medium text-gray-500 block mb-1">ITEM NAME</label>
+                    <input id="item-name" type="text" class="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#4A6CF7]">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 block mb-1">BARCODE / SKU</label>
+                        <input id="item-barcode" type="text" class="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#4A6CF7]">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 block mb-1">DESCRIPTION</label>
+                        <input id="item-description" type="text" placeholder="e.g. 2L" class="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#4A6CF7]">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 block mb-1">PRICE (GH¢)</label>
+                        <input id="item-price" type="number" step="0.01" class="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#4A6CF7]">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 block mb-1">QUANTITY</label>
+                        <input id="item-quantity" type="number" value="10" class="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#4A6CF7]">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex border-t px-8 py-6">
+                <button onclick="hideModal('add-item-modal')" 
+                        class="flex-1 py-5 text-gray-500 font-medium hover:bg-gray-100 rounded-2xl">
+                    Cancel
+                </button>
+                <button onclick="addNewItem()" 
+                        class="flex-1 py-5 ml-4 bg-[#4A6CF7] text-white font-semibold rounded-2xl hover:bg-[#3b5bd6]">
+                    Add Item
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT ITEM MODAL -->
+    <div id="edit-item-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="modal bg-white w-full max-w-lg mx-4 rounded-3xl shadow-2xl">
+            <div class="px-8 pt-8">
+                <h2 class="text-2xl font-semibold">Edit Item</h2>
+            </div>
+            
+            <div class="px-8 py-6 space-y-6">
+                <div>
+                    <label class="text-xs font-medium text-gray-500 block mb-1">ITEM NAME</label>
+                    <input id="edit-item-name" type="text" class="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#4A6CF7]">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 block mb-1">BARCODE / SKU</label>
+                        <input id="edit-item-barcode" type="text" class="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#4A6CF7]">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 block mb-1">DESCRIPTION</label>
+                        <input id="edit-item-description" type="text" class="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#4A6CF7]">
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-6">
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 block mb-1">PRICE (GH¢)</label>
+                        <input id="edit-item-price" type="number" step="0.01" class="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#4A6CF7]">
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 block mb-1">QUANTITY</label>
+                        <input id="edit-item-quantity" type="number" class="w-full px-5 py-4 rounded-2xl border border-gray-200 focus:border-[#4A6CF7]">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex border-t px-8 py-6">
+                <button onclick="deleteCurrentItem()" 
+                        class="flex-1 py-5 text-red-500 font-medium hover:bg-red-50 rounded-2xl">
+                    Delete Item
+                </button>
+                <button onclick="hideModal('edit-item-modal')" 
+                        class="flex-1 py-5 text-gray-500 font-medium hover:bg-gray-100 mx-3 rounded-2xl">
+                    Cancel
+                </button>
+                <button onclick="saveItemEdit()" 
+                        class="flex-1 py-5 bg-[#4A6CF7] text-white font-semibold rounded-2xl hover:bg-[#3b5bd6]">
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tailwind script run
+        function initTailwind() {
+            // Already initialized via CDN
+        }
+
+        // Data
+        let categories = [
+            { id: 1, name: "Beverages" },
+            { id: 2, name: "Snacks" }
+        ]
+        
+        let items = [
+            {
+                id: 101,
+                categoryId: 1,
+                name: "Item name",
+                description: "2L",
+                barcode: "ff226799ks",
+                price: 300,
+                quantity: 30
+            }
+        ]
+        
+        let selectedCategoryId = 1
+        let searchTerm = ""
+        let currentEditCategoryId = null
+        let currentEditItemId = null
+
+        // Render categories
+        function renderCategories() {
+            const container = document.getElementById("categories-list")
+            container.innerHTML = ""
+            
+            categories.forEach(cat => {
+                const isSelected = cat.id === selectedCategoryId
+                
+                const div = document.createElement("div")
+                div.className = `category-pill flex items-center justify-between px-6 py-4 rounded-3xl cursor-pointer ${isSelected ? 'bg-white shadow-md text-[#4A6CF7]' : 'bg-white/70 hover:bg-white'}`
+                div.innerHTML = `
+                    <div onclick="selectCategory(${cat.id}); event.stopImmediatePropagation()" class="font-medium flex-1">
+                        ${cat.name}
+                    </div>
+                    <button onclick="editCategory(${cat.id}); event.stopImmediatePropagation()" 
+                            class="w-8 h-8 flex items-center justify-center text-2xl text-gray-400 hover:text-gray-600 transition-colors">
+                        ⋮
+                    </button>
+                `
+                container.appendChild(div)
+            })
+            
+            // If no categories
+            if (categories.length === 0) {
+                const empty = document.createElement("div")
+                empty.className = "text-center py-12 text-gray-400"
+                empty.innerHTML = `No categories yet.<br><span class="text-xs">Click + to create one</span>`
+                container.appendChild(empty)
+            }
+        }
+
+        // Render items grid
+        function renderItems() {
+            const grid = document.getElementById("items-grid")
+            grid.innerHTML = ""
+            
+            const selectedCat = categories.find(c => c.id === selectedCategoryId)
+            
+            // Add new item card (always first if category selected)
+            if (selectedCategoryId) {
+                const addCard = document.createElement("div")
+                addCard.className = `dotted-card bg-white rounded-3xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:border-[#4A6CF7] transition-colors col-span-1 min-h-[260px]`
+                addCard.innerHTML = `
+                    <div class="w-16 h-16 bg-[#F3E8FF] rounded-2xl flex items-center justify-center text-5xl text-[#4A6CF7] mb-6 shadow-inner">+</div>
+                    <div class="font-semibold text-gray-700">Add new item to</div>
+                    <div class="text-[#4A6CF7] text-xl font-medium mt-1">${selectedCat ? selectedCat.name : 'category'}</div>
+                `
+                addCard.onclick = () => showAddItemModal()
+                grid.appendChild(addCard)
+            }
+            
+            // Filter items
+            let filteredItems = items.filter(item => {
+                if (selectedCategoryId && item.categoryId !== selectedCategoryId) return false
+                if (!searchTerm) return true
+                return (
+                    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    (item.barcode && item.barcode.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                    (item.description && item.description.toLowerCase().includes(searchTerm.toLowerCase()))
+                )
+            })
+            
+            if (filteredItems.length === 0 && selectedCategoryId) {
+                const emptyMsg = document.createElement("div")
+                emptyMsg.className = "col-span-full text-center py-16 text-gray-400"
+                emptyMsg.innerHTML = `
+                    <div class="mx-auto w-20 h-20 bg-gray-100 rounded-3xl flex items-center justify-center text-5xl mb-4">📦</div>
+                    <p class="font-medium">No items yet in this category</p>
+                `
+                grid.appendChild(emptyMsg)
+                return
+            }
+            
+            filteredItems.forEach(item => {
+                const cat = categories.find(c => c.id === item.categoryId)
+                
+                const card = document.createElement("div")
+                card.className = `item-card bg-[#4A6CF7] text-white rounded-3xl p-6 relative overflow-hidden shadow-xl min-h-[260px] flex flex-col`
+                card.innerHTML = `
+                    <!-- Three dots -->
+                    <button onclick="editItem(${item.id}); event.stopImmediatePropagation()" 
+                            class="absolute top-6 right-6 text-white/80 hover:text-white text-3xl leading-none z-10">⋯</button>
+                    
+                    <div class="flex-1">
+                        <div class="text-2xl font-semibold leading-tight">${item.name}</div>
+                        <div class="text-white/70 text-sm mt-1">${item.barcode || '—'}</div>
+                        <div class="text-white/70 text-sm mt-0.5">${item.description || ''}</div>
+                    </div>
+                    
+                    <div class="mt-auto flex justify-between items-end">
+                        <div>
+                            <div class="text-xs text-white/60">PRICE</div>
+                            <div class="text-4xl font-bold tracking-tighter">GH¢${item.price}</div>
+                        </div>
+                        
+                        <div class="bg-white text-[#4A6CF7] text-2xl font-bold w-12 h-12 flex items-center justify-center rounded-2xl shadow">
+                            ${item.quantity}
+                        </div>
+                    </div>
+                `
+                grid.appendChild(card)
+            })
+        }
+
+        // Select category
+        function selectCategory(id) {
+            selectedCategoryId = id
+            renderCategories()
+            renderItems()
+        }
+
+        // Show add category modal
+        function showAddCategoryModal() {
+            document.getElementById("add-category-name").value = ""
+            document.getElementById("add-category-modal").classList.remove("hidden")
+            document.getElementById("add-category-name").focus()
+        }
+
+        function hideModal(modalId) {
+            document.getElementById(modalId).classList.add("hidden")
+        }
+
+        // Create new category
+        function createNewCategory() {
+            const nameInput = document.getElementById("add-category-name")
+            const name = nameInput.value.trim()
+            
+            if (!name) {
+                alert("Please enter a category name")
+                return
+            }
+            
+            const newCat = {
+                id: Date.now(),
+                name: name
+            }
+            
+            categories.push(newCat)
+            hideModal("add-category-modal")
+            renderCategories()
+            
+            // Auto select the new category
+            selectedCategoryId = newCat.id
+            renderCategories()
+            renderItems()
+        }
+
+        // Edit category
+        function editCategory(id) {
+            currentEditCategoryId = id
+            const cat = categories.find(c => c.id === id)
+            if (!cat) return
+            
+            document.getElementById("edit-category-name").value = cat.name
+            document.getElementById("edit-category-modal").classList.remove("hidden")
+        }
+
+        function saveCategoryEdit() {
+            if (!currentEditCategoryId) return
+            const newName = document.getElementById("edit-category-name").value.trim()
+            
+            if (!newName) {
+                alert("Name cannot be empty")
+                return
+            }
+            
+            const cat = categories.find(c => c.id === currentEditCategoryId)
+            if (cat) cat.name = newName
+            
+            hideModal("edit-category-modal")
+            renderCategories()
+            renderItems()
+        }
+
+        function deleteCurrentCategory() {
+            if (!currentEditCategoryId) return
+            if (!confirm("Delete this category and ALL its items?")) return
+            
+            // Remove category
+            categories = categories.filter(c => c.id !== currentEditCategoryId)
+            
+            // Remove associated items
+            items = items.filter(i => i.categoryId !== currentEditCategoryId)
+            
+            hideModal("edit-category-modal")
+            
+            // Select first remaining or none
+            if (categories.length > 0) {
+                selectedCategoryId = categories[0].id
+            } else {
+                selectedCategoryId = null
+            }
+            
+            renderCategories()
+            renderItems()
+        }
+
+        // Show add item modal
+        function showAddItemModal() {
+            if (!selectedCategoryId) {
+                alert("Please select a category first")
+                return
+            }
+            
+            const cat = categories.find(c => c.id === selectedCategoryId)
+            document.getElementById("add-item-category-name").textContent = cat ? cat.name : ""
+            
+            // Clear fields
+            document.getElementById("item-name").value = ""
+            document.getElementById("item-barcode").value = ""
+            document.getElementById("item-description").value = ""
+            document.getElementById("item-price").value = ""
+            document.getElementById("item-quantity").value = "10"
+            
+            document.getElementById("add-item-modal").classList.remove("hidden")
+        }
+
+        function addNewItem() {
+            if (!selectedCategoryId) return
+            
+            const name = document.getElementById("item-name").value.trim()
+            if (!name) {
+                alert("Item name is required")
+                return
+            }
+            
+            const newItem = {
+                id: Date.now(),
+                categoryId: selectedCategoryId,
+                name: name,
+                description: document.getElementById("item-description").value.trim(),
+                barcode: document.getElementById("item-barcode").value.trim(),
+                price: parseFloat(document.getElementById("item-price").value) || 0,
+                quantity: parseInt(document.getElementById("item-quantity").value) || 0
+            }
+            
+            items.push(newItem)
+            hideModal("add-item-modal")
+            renderItems()
+        }
+
+        // Edit item
+        function editItem(id) {
+            currentEditItemId = id
+            const item = items.find(i => i.id === id)
+            if (!item) return
+            
+            document.getElementById("edit-item-name").value = item.name
+            document.getElementById("edit-item-barcode").value = item.barcode || ""
+            document.getElementById("edit-item-description").value = item.description || ""
+            document.getElementById("edit-item-price").value = item.price
+            document.getElementById("edit-item-quantity").value = item.quantity
+            
+            document.getElementById("edit-item-modal").classList.remove("hidden")
+        }
+
+        function saveItemEdit() {
+            if (!currentEditItemId) return
+            
+            const item = items.find(i => i.id === currentEditItemId)
+            if (!item) return
+            
+            item.name = document.getElementById("edit-item-name").value.trim()
+            item.barcode = document.getElementById("edit-item-barcode").value.trim()
+            item.description = document.getElementById("edit-item-description").value.trim()
+            item.price = parseFloat(document.getElementById("edit-item-price").value) || 0
+            item.quantity = parseInt(document.getElementById("edit-item-quantity").value) || 0
+            
+            hideModal("edit-item-modal")
+            renderItems()
+        }
+
+        function deleteCurrentItem() {
+            if (!currentEditItemId) return
+            if (!confirm("Delete this item permanently?")) return
+            
+            items = items.filter(i => i.id !== currentEditItemId)
+            hideModal("edit-item-modal")
+            renderItems()
+        }
+
+        // Search handler
+        function handleSearch(value) {
+            searchTerm = value
+            renderItems()
+        }
+
+        // Fake nav click
+        function fakeNavClick(el) {
+            document.querySelectorAll('.flex.items-center').forEach(link => {
+                link.classList.remove('bg-white/20', 'text-white')
+            })
+            el.classList.add('bg-white/20', 'text-white')
+            // Only Inventory is active by default
+        }
+
+        // Keyboard escape support
+        function handleEscape(e) {
+            if (e.key === "Escape") {
+                const modals = document.querySelectorAll('.fixed.inset-0')
+                for (let modal of modals) {
+                    if (!modal.classList.contains('hidden')) {
+                        modal.classList.add('hidden')
+                        return
+                    }
+                }
+            }
+        }
+
+        // Initialize everything
+        function initializeApp() {
+            // Render initial state
+            renderCategories()
+            renderItems()
+            
+            // Tailwind ready
+            initTailwind()
+            
+            // Keyboard listener
+            document.addEventListener("keydown", handleEscape)
+            
+            // Click outside modals to close
+            const modals = document.querySelectorAll('#add-category-modal, #edit-category-modal, #add-item-modal, #edit-item-modal')
+            modals.forEach(modal => {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden')
+                    }
+                })
+            })
+            
+            // Demo note
+            console.log('%c✅ POS Inventory page ready! Click categories, + buttons, three dots to test all features.', 'color:#4A6CF7; font-size:13px')
+        }
+
+        // Boot the app
+        window.onload = initializeApp
+    </script>
+</body>
+</html>

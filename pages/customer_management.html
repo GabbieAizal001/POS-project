@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POSify - Customer Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../styles/a_Dashboard.css"/>
+  <link rel="stylesheet" href="../styles/customer_management.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+  <!-- SIDEBAR (Admin style) -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">POS</div>
+      <div class="sidebar-brand">POSify</div>
+    </div>
+
+    <div class="sidebar-nav" id="dynamic-sidebar">
+      <!-- Admin sidebar -->
+      <a href="admin_dashboard.html" class="sidebar-link" data-role-admin>
+        Dashboard
+      </a>
+      <a href="employee_management.html?role=admin" class="sidebar-link" data-role-admin>
+        Employees
+      </a>
+      <a href="inventory.html?role=admin" class="sidebar-link" data-role-admin>
+        Inventory
+      </a>
+      <a href="customer_management.html" class="sidebar-link" data-role-admin>
+        Customers
+      </a>
+      <a href="reports.html" class="sidebar-link" data-role-admin>
+        Reports
+      </a>
+
+      <!-- Manager sidebar -->
+      <a href="manager_dashboard.html?role=manager" class="sidebar-link" data-role-manager>
+        Dashboard
+      </a>
+      <a href="inventory.html?role=manager" class="sidebar-link" data-role-manager>
+        Inventory
+      </a>
+      <a href="manager_sales_report.html?role=manager" class="sidebar-link" data-role-manager>
+        Sales Report
+      </a>
+      <a href="customer_management.html?role=manager" class="sidebar-link" data-role-manager>
+        View Customers
+      </a>
+
+      <!-- Cashier sidebar -->
+      <a href="cashier_dashboard.html" class="sidebar-link" data-role-cashier>
+        Dashboard
+      </a>
+      <a href="product_management.html" class="sidebar-link" data-role-cashier>
+        Products
+      </a>
+      <a href="cashier_checkout.html" class="sidebar-link" data-role-cashier>
+        New Sale
+      </a>
+      <a href="cashier_history.html" class="sidebar-link" data-role-cashier>
+        History
+      </a>
+      <a href="customer_management.html?role=cashier" class="sidebar-link" data-role-cashier>
+        Customers
+      </a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="login.html" class="sidebar-link">Logout</a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="welcome-text">Customer Management</span>
+      </div>
+      <div class="topbar-right">
+        <div class="profile-circle">
+          <i class="fa-solid fa-user"></i>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">Admin</div>
+          <div class="profile-role">Administrator</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- Customer Stats Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-badge">0</div>
+          <div class="stat-info">
+            <h4>Total Customers</h4>
+            <p>Registered</p>
+          </div>
+          <div class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-badge">0</div>
+          <div class="stat-info">
+            <h4>New This Month</h4>
+            <p>Registered</p>
+          </div>
+          <div class="stat-value">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-badge">0%</div>
+          <div class="stat-info">
+            <h4>Repeat Rate</h4>
+            <p>Returning customers</p>
+          </div>
+          <div class="stat-value">0%</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-badge">0</div>
+          <div class="stat-info">
+            <h4>High Value</h4>
+            <p>Loyalty VIPs</p>
+          </div>
+          <div class="stat-value">0</div>
+        </div>
+      </div>
+
+      <!-- Add New Customer Form - Premium Design -->
+      <div class="card full-width">
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <span class="card-title">Add New Customer</span>
+          <div class="add-customer-badge">
+            <i class="fa-solid fa-user-plus"></i> Quick Add
+          </div>
+        </div>
+        <div class="card-body perfect-customer-form">
+          <!-- Hero Header -->
+          <div class="form-hero">
+            <div class="hero-visual">
+              <div class="hero-gradient">
+                <i class="hero-icon fa-solid fa-user-group"></i>
+              </div>
+            </div>
+            <div class="hero-content">
+              <h1 class="hero-title">Add New Customer</h1>
+              <p class="hero-subtitle">Create a new customer profile with all essential details. Our system automatically detects VIP status based on purchase history and behavior patterns.</p>
+            </div>
+          </div>
+          
+          <!-- Main Form -->
+          <form id="customerForm" class="customer-form perfect-form">
+            <div class="form-grid perfect-grid">
+              <!-- Essential Fields Row 1 -->
+              <div class="form-field-group">
+                <div class="avatar-field">
+                  <div class="avatar-display">
+                    <div class="avatar-placeholder">
+                      <i class="fa-solid fa-user-large"></i>
+                    </div>
+                    <div class="avatar-upload-overlay">
+                      <label class="upload-trigger">
+                        <i class="fa-solid fa-camera"></i>
+                        <input type="file" accept="image/jpeg,image/png" class="file-input">
+                      </label>
+                    </div>
+                  </div>
+                  <div class="upload-status" style="display: none;">
+                    Photo uploaded ✓
+                  </div>
+                </div>
+                
+                <div class="form-field primary-field">
+                  <label class="field-label primary-label">
+                    <i class="icon fa-solid fa-user"></i>
+                    Full Name
+                    <span class="required">*</span>
+                  </label>
+                  <div class="input-container">
+                    <input type="text" id="customerName" class="input perfect-input" placeholder="e.g. John Kwame Mensah" required>
+                  </div>
+                </div>
+                
+                <div class="form-field primary-field">
+                  <label class="field-label primary-label">
+                    <i class="icon fa-solid fa-phone"></i>
+                    Phone Number
+                    <span class="required">*</span>
+                  </label>
+                  <div class="input-container">
+                    <input type="tel" id="customerPhone" class="input perfect-input" placeholder="024 123 4567" required>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Essential Fields Row 2 -->
+              <div class="form-field-group">
+                <div class="form-field">
+                  <label class="field-label">
+                    <i class="icon fa-solid fa-envelope"></i>
+                    Email Address
+                  </label>
+                  <div class="input-container">
+                    <input type="email" id="customerEmail" class="input perfect-input" placeholder="john@example.com">
+                  </div>
+                </div>
+                
+                <div class="form-field">
+                  <label class="field-label">
+                    <i class="icon fa-solid fa-crown"></i>
+                    Customer Tier
+                  </label>
+                  <div class="input-container">
+                    <select id="customerTier" class="input perfect-select">
+  <option value="Bronze">Bronze</option>
+  <option value="Silver">Silver</option>
+  <option value="Gold">Gold</option>
+  <option value="Platinum">Platinum</option>
+</select>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Loyalty Fields -->
+              <div class="form-section loyalty-section">
+                <div class="section-header">
+                  <i class="section-icon fa-solid fa-star"></i>
+                  <span>Loyalty & Preferences</span>
+                </div>
+                <div class="form-field-group">
+                  <div class="form-field">
+                    <label class="field-label">
+                      <i class="icon fa-solid fa-coins"></i>
+                      Starting Loyalty Points
+                    </label>
+                    <div class="input-container">
+                      <input type="number" id="customerLoyalty" class="input perfect-input" value="0" min="0">
+                    </div>
+                  </div>
+                  <div class="form-field">
+                    <label class="field-label">
+                      <i class="icon fa-solid fa-birthday-cake"></i>
+                      Birthday (MM/DD)
+                    </label>
+                    <div class="input-container">
+                      <input type="text" id="customerDob" class="input perfect-input" placeholder="12/25">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Notes Field -->
+              <div class="form-section notes-section">
+                <div class="section-header">
+                  <i class="section-icon fa-solid fa-sticky-note"></i>
+                  <span>Delivery Address & Notes</span>
+                </div>
+                <div class="form-field full-width-field">
+                  <label class="field-label">
+                    <i class="icon fa-solid fa-map-pin"></i>
+                    Primary Address & Special Notes
+                  </label>
+                  <div class="input-container textarea-container">
+                    <textarea id="customerAddress" class="input perfect-textarea" rows="4" placeholder="House No. 45, New Legon Estates, Accra. Contact before delivery. Prefers payment on delivery. VIP customer - birthday in December."></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Action Bar -->
+            <div class="form-action-bar">
+              <button type="reset" class="action-btn secondary">
+                <i class="btn-icon fa-solid fa-times-circle"></i>
+                Reset Form
+              </button>
+              <button type="submit" class="action-btn primary">
+                <i class="btn-icon fa-solid fa-user-plus"></i>
+                <span>Create Profile</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Premium Customers Table -->
+      <div class="card full-width premium-table-card">
+        <div class="card-header premium-header">
+          <div class="header-left">
+            <span class="card-title">All Customers</span>
+            <span class="customer-count">0 active • 0 new this month</span>
+          </div>
+          <div class="table-actions premium-actions">
+            <div class="search-container">
+              <i class="fa-solid fa-magnifying-glass search-icon"></i>
+              <input type="text" class="search-input premium-search" placeholder="Search by name or phone...">
+            </div>
+            <div class="filter-container">
+              <select class="filter-select premium-filter">
+                <option>All Customers</option>
+                <option>Platinum</option>
+                <option>Gold</option>
+                <option>Silver</option>
+                <option>Bronze</option>
+              </select>
+            </div>
+            <button class="btn-export">
+              <i class="fa-solid fa-download"></i> Export CSV
+            </button>
+          </div>
+        </div>
+        <div class="premium-table-wrapper">
+          <div class="table-header-row">
+            <div class="table-cell id-col"><span>ID</span></div>
+            <div class="table-cell name-col"><span>Name</span></div>
+            <div class="table-cell phone-col"><span>Phone</span></div>
+            <div class="table-cell spend-col"><span>Total Spend</span></div>
+            <div class="table-cell visits-col"><span>Visits</span></div>
+            <div class="table-cell points-col"><span>Points</span></div>
+            <div class="table-cell status-col"><span>Status</span></div>
+            <div class="table-cell actions-col"><span>Actions</span></div>
+          </div>
+        </div>
+
+        <div class="table-footer">
+          <div class="pagination">
+            <button class="page-btn" id="prevPageBtn">
+              <i class="fa-solid fa-chevron-left"></i>
+            </button>
+            <span class="page-info" id="pageInfo">Page 1 of 1</span>
+            <button class="page-btn" id="nextPageBtn">
+              <i class="fa-solid fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Filter sidebar links based on user role
+(function filterSidebar() {
+  const currentRole = new URLSearchParams(window.location.search).get('role') || localStorage.getItem('userRole') || 'admin';
+  document.querySelectorAll('.sidebar-nav a').forEach(link => {
+    if (link.hasAttribute('data-role-admin') || link.hasAttribute('data-role-manager') || link.hasAttribute('data-role-cashier')) {
+      if (!link.hasAttribute(`data-role-${currentRole}`)) {
+        link.remove(); // Physically remove from DOM to prevent CSS overrides
+      }
+    }
+  });
+})();
+</script>
+
+<style>
+/* Card spacing improved via CSS */
+.card.full-width {
+  margin-bottom: 32px;
+}
+
+/* Fix topbar coverage */
+.topbar {
+  z-index: 20 !important;
+  position: relative !important;
+}
+.content {
+  position: relative;
+  z-index: 1;
+}
+.form-hero {
+  position: relative;
+  z-index: 1;
+}
+
+/* Complete Premium Customer Management Styles */
+.status-vip { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #d97706; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; box-shadow: 0 2px 8px rgba(237,181,93,0.3); }
+.status-active { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #059669; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; box-shadow: 0 2px 8px rgba(5,150,105,0.3); }
+.status-new { background: linear-gradient(135deg, #dbeafe, #93c5fd); color: #3b82f6; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; box-shadow: 0 2px 8px rgba(59,130,246,0.3); }
+
+/* Premium Table Styles */
+.premium-table-card {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.premium-header {
+  padding: 28px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: linear-gradient(135deg, rgba(248,250,252,0.8) 0%, rgba(255,255,255,1) 100%);
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-title {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+}
+
+.customer-count {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.premium-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.search-container {
+  position: relative;
+  background: white;
+  border-radius: 16px;
+  padding: 12px 20px 12px 48px;
+  border: 2px solid #e2e8f0;
+  min-width: 280px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.search-icon {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #94a3b8;
+  font-size: 16px;
+}
+
+.premium-search {
+  border: none !important;
+  outline: none !important;
+  width: 100%;
+  font-size: 15px;
+  background: transparent;
+}
+
+.filter-container {
+  position: relative;
+}
+
+.premium-filter {
+  padding: 12px 20px !important;
+  border: 2px solid #e2e8f0 !important;
+  border-radius: 16px !important;
+  background: white;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.btn-export {
+  background: linear-gradient(135deg, var(--primary), #2563EB);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 20px rgba(59,130,246,0.3);
+  transition: all 0.3s ease;
+}
+
+.btn-export:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(59,130,246,0.4);
+}
+
+.premium-table-wrapper {
+  max-height: 600px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.premium-table-wrapper::-webkit-scrollbar {
+  width: 8px;
+}
+
+.premium-table-wrapper::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.premium-table-wrapper::-webkit-scrollbar-thumb {
+  background: linear-gradient(var(--primary), #2563EB);
+  border-radius: 4px;
+}
+
+.table-header-row {
+  display: grid;
+  grid-template-columns: 80px 280px 140px 140px 80px 100px 140px 160px;
+  gap: 1px;
+  background: linear-gradient(90deg, #f8fafc 0%, white 100%);
+  padding: 20px 32px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.customer-row {
+  display: grid;
+  grid-template-columns: 80px 280px 140px 140px 80px 100px 140px 160px;
+  gap: 1px;
+  padding: 24px 32px;
+  background: white;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+}
+
+.customer-row:hover {
+  background: linear-gradient(90deg, #f0f9ff 0%, #f8fafc 100%);
+  transform: translateX(8px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+.vip-row { border-left: 4px solid #f59e0b; }
+.vip-row:hover { border-left: 6px solid #f59e0b; }
+.active-row { border-left: 4px solid #10b981; }
+.active-row:hover { border-left: 6px solid #10b981; }
+.new-row { border-left: 4px solid var(--primary); }
+.new-row:hover { border-left: 6px solid var(--primary); }
+
+.table-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.id-col { justify-content: center; font-family: 'Roboto Mono', monospace; font-weight: 700; color: #3b82f6; }
+.name-col { gap: 12px; }
+.customer-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  color: #94a3b8;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.customer-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.customer-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 15px;
+}
+
+.customer-email {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.phone-col { font-weight: 500; color: #374151; }
+.spend-col { 
+  justify-content: flex-end;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--primary);
+}
+.currency {
+  font-size: 12px;
+  opacity: 0.7;
+  font-weight: 500;
+}
+.spend-trend {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 12px;
+}
+.spend-trend.up { background: #dcfce7; color: #166534; }
+.spend-trend.steady { background: #fef3c7; color: #92400e; }
+
+.visits-col { 
+  justify-content: center; 
+  font-weight: 700;
+  color: #059669;
+}
+.trend-icon {
+  font-size: 14px;
+  width: 16px;
+}
+.trend-icon.up { color: #10b981; }
+.trend-icon.steady { color: #f59e0b; }
+
+.points-col {
+  justify-content: center;
+  font-weight: 600;
+}
+.points-badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+.points-badge.vip { background: #fef3c7; color: #d97706; }
+
+.status-col { justify-content: center; }
+.status-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+.status-badge.vip { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #d97706; }
+.status-badge.active { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #059669; }
+.status-badge.new { background: linear-gradient(135deg, #dbeafe, #93c5fd); color: #3b82f6; }
+
+.actions-col {
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 14px;
+  color: #64748b;
+  background: rgba(255,255,255,0.7);
+}
+
+.action-btn:hover {
+  transform: scale(1.1);
+  color: var(--primary);
+  background: rgba(59,130,246,0.1);
+  box-shadow: 0 4px 12px rgba(59,130,246,0.2);
+}
+
+.action-menu {
+  position: relative;
+}
+
+.action-btn.more:hover {
+  background: rgba(107,114,128,0.2);
+}
+
+.table-footer {
+  padding: 24px 32px;
+  border-top: 1px solid #f1f5f9;
+  background: #fafbfc;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  justify-content: center;
+}
+
+.page-btn {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #e2e8f0;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #64748b;
+  transition: all 0.2s ease;
+}
+
+.page-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.page-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.page-info {
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Previous existing styles preserved */
+.status-vip { background: #fef3c7; color: #d97706; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.status-active { background: #d1fae5; color: #059669; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.status-new { background: #dbeafe; color: #3b82f6; padding: 4px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+
+.form-group textarea {
+  padding: 12px 16px;
+  border: 2px solid rgba(139,156,228,0.3);
+  border-radius: 12px;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+}
+
+@media (max-width: 768px) {
+  .table-header-row,
+  .customer-row {
+    grid-template-columns: 80px 1fr 120px 120px 80px 1fr 1fr 120px;
+    gap: 8px;
+    padding: 16px 20px;
+  }
+  
+  .premium-actions {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .search-container {
+    min-width: auto;
+    padding: 14px 16px 14px 44px;
+  }
+}
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../scripts/supabase.js"></script>
+<script src="../scripts/auth-guard.js"></script>
+<script src="../scripts/customer_management.js"></script>
+<script src="../scripts/user-profile.js"></script>
+<script src="../scripts/sidebar-highlight.js"></script>
+</body>
+</html>

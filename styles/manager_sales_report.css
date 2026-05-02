@@ -1,0 +1,88 @@
+.content {
+  display: grid;
+  gap: 16px;
+}
+
+.filter-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.filter-row input {
+  border: 1px solid rgba(139, 156, 228, 0.45);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.btn-primary {
+  border: none;
+  border-radius: 12px;
+  background: var(--primary, #10b981);
+  color: #fff;
+  padding: 10px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  filter: brightness(1.05);
+}
+
+.btn-secondary {
+  border: 2px solid var(--primary, #10b981);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  color: var(--primary, #10b981);
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.btn-secondary:hover {
+  background: var(--primary, #10b981);
+  color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.25);
+}
+
+.report-stats {
+  margin-top: 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+.sales-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sales-table th,
+.sales-table td {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid rgba(139, 156, 228, 0.2);
+}
+
+.sales-table th {
+  background: rgba(201, 207, 253, 0.35);
+}
+
+.table-card {
+  margin-bottom: 24px;
+}

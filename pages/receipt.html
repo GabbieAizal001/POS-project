@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POSify - Receipt</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #f8fafc;
+      padding: 40px 20px;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .receipt-container {
+      background: white;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 0 auto;
+    }
+    
+    .receipt-header {
+      background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+      color: white;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    
+    .store-logo {
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      margin: 0 auto 12px;
+    }
+    
+    .store-name {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    
+    .store-info {
+      font-size: 14px;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+    
+    .receipt-body {
+      padding: 32px 24px;
+    }
+    
+    .receipt-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+    
+    .receipt-meta div {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    
+    .meta-label {
+      color: #64748B;
+      font-weight: 500;
+      text-transform: uppercase;
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+    
+    .meta-value {
+      font-weight: 600;
+      font-size: 14px;
+      color: #1E293B;
+    }
+    
+    .receipt-id {
+      grid-column: 1 / -1;
+      font-family: 'Roboto Mono', monospace;
+      font-size: 16px;
+      font-weight: 600;
+      color: #3B82F6;
+      text-align: center;
+      margin-bottom: 8px;
+      letter-spacing: 2px;
+    }
+    
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+    }
+    
+    .items-table th,
+    .items-table td {
+      padding: 12px 0;
+      text-align: left;
+      border-bottom: 1px solid #E2E8F0;
+    }
+    
+    .items-table th {
+      color: #64748B;
+      font-weight: 600;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .items-table td {
+      font-size: 14px;
+    }
+    
+    .item-desc {
+      font-weight: 500;
+    }
+    
+    .item-price,
+    .line-total {
+      font-weight: 600;
+      text-align: right;
+      color: #1E293B;
+    }
+    
+    .totals-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px dashed #E2E8F0;
+    }
+    
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    
+    .total-row subtotal {
+      font-weight: 500;
+    }
+    
+    .grand-total {
+      font-size: 20px;
+      font-weight: 800;
+      color: #1E293B;
+      border-top: 2px solid #3B82F6;
+      padding-top: 12px;
+      margin-top: 8px;
+    }
+    
+    .payment-section {
+      margin-top: 24px;
+      padding: 16px;
+      background: #F1F5F9;
+      border-radius: 8px;
+    }
+    
+    .payment-method {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      color: #059669;
+    }
+    
+    .payment-method i {
+      background: #D1FAE5;
+      color: #059669;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    
+    .receipt-footer {
+      margin-top: 32px;
+      padding-top: 24px;
+      border-top: 2px dashed #E2E8F0;
+      text-align: center;
+      color: #64748B;
+      font-size: 13px;
+    }
+    
+    .thank-you {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1E293B;
+      margin-bottom: 12px;
+    }
+    
+    .qr-code {
+      width: 80px;
+      height: 80px;
+      margin: 12px auto;
+      background: #f0f0f0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #9CA3AF;
+      font-size: 24px;
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px rgba(59,130,246,0.4);
+    }
+    
+    .btn-secondary {
+      background: #F8FAFC;
+      color: #64748B;
+      border: 2px solid #E2E8F0;
+    }
+    
+    .btn-secondary:hover {
+      background: #E2E8F0;
+    }
+    
+    @media print {
+      body { background: white; padding: 0; }
+      .receipt-container { box-shadow: none; max-width: none; }
+      .action-buttons { display: none; }
+    }
+    
+    @media (max-width: 480px) {
+      .receipt-container { margin: 20px; }
+      .receipt-meta { grid-template-columns: 1fr; }
+      .receipt-body { padding: 24px 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="receipt-container">
+  <!-- HEADER -->
+  <div class="receipt-header">
+    <div class="store-logo">
+      <i class="fas fa-store"></i>
+    </div>
+    <div class="store-name">POSify Supermarket</div>
+    <div class="store-info">123 Main Street | Accra | 0302-123456</div>
+  </div>
+
+  <!-- BODY -->
+  <div class="receipt-body">
+        <!-- RECEIPT META -->
+        <div class="receipt-meta">
+            <div class="receipt-id" id="receiptId">RECEIPT #...</div>
+            <div>
+                <span class="meta-label">Cashier</span>
+                <span class="meta-value" id="cashierName">Cashier Name</span>
+            </div>
+            <div>
+                <span class="meta-label">Date & Time</span>
+                <span class="meta-value" id="receiptDate">YYYY-MM-DD HH:MM</span>
+            </div>
+            <div>
+                <span class="meta-label">Customer</span>
+                <span class="meta-value" id="customerName">Walk-in Customer</span>
+            </div>
+            <div>
+                <span class="meta-label">Phone</span>
+                <span class="meta-value" id="customerPhone">N/A</span>
+            </div>
+        </div>
+
+        <!-- ITEMS TABLE -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody id="itemsTbody">
+                <!-- Items will be dynamically inserted here -->
+            </tbody>
+        </table>
+
+        <!-- TOTALS -->
+        <div class="totals-section">
+            <div class="total-row">
+                <span>Subtotal</span>
+                <span id="subtotalValue">GHC 0.00</span>
+            </div>
+            <div class="total-row">
+                <span>VAT/Tax</span>
+                <span id="taxValue">GHC 0.00</span>
+            </div>
+            <div class="total-row" id="discountRow" style="display: none; color: #059669; font-weight: 600;">
+                <span>VIP Discount</span>
+                <span id="discountValue">-GHC 0.00</span>
+            </div>
+            <div class="grand-total" id="totalValue">
+                TOTAL: GHC 0.00
+            </div>
+        </div>
+
+        <!-- PAYMENT -->
+        <div class="payment-section">
+            <div class="payment-method">
+                <i id="paymentMethodIcon" class="fas fa-money-bill-wave"></i>
+                <span id="paymentMethodText">Cash Payment</span>
+            </div>
+            <div class="total-row" style="margin-top: 12px; font-size: 14px;">
+                <span>Tendered</span>
+                <span id="tenderedValue">GHC 0.00</span>
+            </div>
+            <div class="total-row" style="margin-top: 4px; font-weight: 600; color: #059669;">
+                <span>Change</span>
+                <span id="changeValue">GHC 0.00</span>
+            </div>
+        </div>
+
+        <!-- QR CODE -->
+        <div class="qr-code">
+            <i class="fas fa-qrcode"></i>
+        </div>
+
+        <!-- FOOTER -->
+        <div class="receipt-footer">
+            <div class="thank-you">Thank you for your purchase!</div>
+            <div>Come again soon</div>
+            <div style="margin-top: 16px; font-size: 11px;">
+                Powered by POSify • Transaction logged securely
+            </div>
+        </div>
+  </div>
+
+  <!-- ACTION BUTTONS (Screen only) -->
+  <div class="action-buttons">
+    <a href="javascript:void(0)" id="printReceiptBtn" class="btn btn-secondary">
+      <i class="fas fa-print"></i> Print Receipt
+    </a>
+    <a href="javascript:void(0)" id="emailReceiptBtn" class="btn btn-primary">
+      <i class="fas fa-share"></i> Email Receipt
+    </a>
+    <a href="cashier_checkout.html" class="btn btn-secondary">
+      <i class="fas fa-arrow-left"></i> New Sale
+    </a>
+  </div>
+</div>
+
+<script>
+    const receipt = JSON.parse(localStorage.getItem("lastReceipt") || "null");
+
+    if (receipt) {
+        // Meta Information
+        document.getElementById("receiptId").textContent = receipt.id;
+        document.getElementById("cashierName").textContent = receipt.cashier || "N/A";
+        document.getElementById("receiptDate").textContent = `${receipt.date} ${receipt.time}`;
+        document.getElementById("customerName").textContent = receipt.customerName || "Walk-in Customer";
+        document.getElementById("customerPhone").textContent = receipt.customerPhone || "N/A";
+
+        // Items Table
+        const itemsTbody = document.getElementById("itemsTbody");
+        itemsTbody.innerHTML = receipt.lines.map(item => `
+            <tr>
+                <td class="item-desc">${item.name}</td>
+                <td>${item.qty}</td>
+                <td>GHC ${item.price.toFixed(2)}</td>
+                <td class="line-total">GHC ${(item.qty * item.price).toFixed(2)}</td>
+            </tr>
+        `).join('');
+
+        // Totals Section
+        document.getElementById("subtotalValue").textContent = `GHC ${receipt.subtotal.toFixed(2)}`;
+        document.getElementById("taxValue").textContent = `GHC ${receipt.tax.toFixed(2)}`;
+        
+        if (receipt.discount && receipt.discount > 0) {
+            const discountRow = document.getElementById("discountRow");
+            discountRow.style.display = "flex";
+            document.getElementById("discountValue").textContent = `-GHC ${receipt.discount.toFixed(2)}`;
+        }
+        document.getElementById("totalValue").textContent = `TOTAL: GHC ${receipt.total.toFixed(2)}`;
+
+        // Payment Section
+        const paymentMethodText = document.getElementById("paymentMethodText");
+        const paymentMethodIcon = document.getElementById("paymentMethodIcon");
+        const paymentIcons = {
+            cash: 'fa-money-bill-wave',
+            mobile: 'fa-mobile-alt',
+            card: 'fa-credit-card'
+        };
+        paymentMethodText.textContent = `${receipt.paymentMethod.charAt(0).toUpperCase() + receipt.paymentMethod.slice(1)} Payment`;
+        paymentMethodIcon.className = `fas ${paymentIcons[receipt.paymentMethod] || 'fa-question-circle'}`;
+
+        document.getElementById("tenderedValue").textContent = `GHC ${receipt.tendered.toFixed(2)}`;
+        document.getElementById("changeValue").textContent = `GHC ${receipt.change.toFixed(2)}`;
+
+    } else {
+        // Handle case where there is no receipt data
+        document.querySelector('.receipt-body').innerHTML = '<p style="text-align:center; padding: 40px;">No receipt data found. Please complete a new sale.</p>';
+    }
+
+    // Action Buttons
+    document.getElementById("printReceiptBtn").addEventListener("click", function(e) {
+        e.preventDefault();
+        window.print();
+    });
+
+    document.getElementById("emailReceiptBtn").addEventListener("click", function(e) {
+        e.preventDefault();
+        alert("Receipt emailed (demo)");
+    });
+</script>
+
+</body>
+</html>

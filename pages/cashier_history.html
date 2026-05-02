@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POSify - My History</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../styles/cashier_dashboard.css"/>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- SIDEBAR - History page -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">POS</div>
+      <div class="sidebar-brand">POSify</div>
+    </div>
+    <div class="sidebar-nav">
+      <a href="cashier_dashboard.html" class="sidebar-link">Dashboard</a>
+      <a href="product_management.html" class="sidebar-link" data-role-cashier>Products</a>
+      <a href="cashier_checkout.html" class="sidebar-link">New Sale</a>
+      <a href="cashier_history.html" class="sidebar-link">History</a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" onclick="logout()" class="sidebar-link">Logout</a>
+    </div>
+
+  </div>
+
+  <!-- HISTORY MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="welcome-text">My Sales History</span>
+      </div>
+      <div class="topbar-right">
+        <div class="profile-circle">
+          <i class="fa-solid fa-user"></i>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">Cashier Name</div>
+          <div class="profile-role">Cashier</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content content-cashier">
+      
+      <!-- Filter Bar -->
+      <div class="card" style="margin-bottom: 24px;">
+        <div class="card-header">
+          <span class="card-title">Filter Sales</span>
+          <div style="display: flex; gap: 12px;">
+            <select id="dateFilter" onchange="fetchAndRenderSales()" style="padding: 8px 16px; border-radius: 12px; border: 1px solid var(--secondary);">
+              <option value="All Time">All Time</option>
+              <option value="Today">Today</option>
+              <option value="Yesterday">Yesterday</option>
+              <option value="This Week">This Week</option>
+            </select>
+            <button onclick="exportHistory()" style="padding: 8px 20px; background: var(--primary); color: white; border: none; border-radius: 12px; cursor: pointer;">
+              <i class="fa-solid fa-download"></i> Export
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sales Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3>My Recent Transactions (42 total)</h3>
+        </div>
+        <div class="alert-list" style="padding: 0;">
+          <div class="sale-item" style="padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.05);">
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 15px;">#001 - Cash - 10:30 AM</div>
+              <div style="font-size: 13px; color: var(--muted);">3 items • Mineral Water x2, Coke x1</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 18px; font-weight: 800; color: var(--primary);">GHC 285.00</div>
+              <div style="font-size: 12px; color: var(--muted);">✓ Completed</div>
+            </div>
+          </div>
+          <div class="sale-item" style="padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.05);">
+            <div style="flex: 1;">
+              <div style="font-weight: 700; font-size: 15px;">#002 - Mobile Money - 10:25 AM</div>
+              <div style="font-size: 13px; color: var(--muted);">1 item • Energy Drink x1</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 18px; font-weight: 800; color: var(--primary);">GHC 45.00</div>
+              <div style="font-size: 12px; color: var(--muted);">✓ Completed</div>
+            </div>
+          </div>
+          <!-- More sales... -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const salesContainer = document.querySelector(".alert-list");
+const salesHeader = document.querySelector(".card-header h3");
+let currentHistorySales = []; // Store the currently fetched sales for exporting
+
+async function fetchAndRenderSales() {
+  salesHeader.textContent = "Loading...";
+  salesContainer.innerHTML = '<div style="padding: 20px; text-align: center;"><i class="fa-solid fa-spinner fa-spin"></i> Loading history...</div>';
+
+  try {
+    // Get logged in cashier's session
+    const { data: { session } } = await window.supabase.auth.getSession();
+    
+    // Fetch sales specifically for this cashier
+    let query = window.supabase
+      .from('sales')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .limit(100);
+      
+    if (session?.user?.id) {
+      query = query.eq('cashier_id', session.user.id);
+    }
+
+    // Apply Date Filters
+    const filterVal = document.getElementById("dateFilter")?.value || "All Time";
+    const now = new Date();
+    
+    if (filterVal === "Today") {
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      query = query.gte('created_at', startOfToday.toISOString());
+    } else if (filterVal === "Yesterday") {
+      const startOfYesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      query = query.gte('created_at', startOfYesterday.toISOString()).lt('created_at', startOfToday.toISOString());
+    } else if (filterVal === "This Week") {
+      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+      query = query.gte('created_at', startOfWeek.toISOString());
+    }
+
+    const { data: sales, error } = await query;
+    if (error) throw error;
+    currentHistorySales = sales; // Save to global variable for export
+
+    salesHeader.textContent = `My Recent Transactions (${sales.length} total)`;
+
+    if (!sales || sales.length === 0) {
+      salesContainer.innerHTML = '<div class="sale-item" style="padding: 20px;"><div style="font-weight: 600;">No transactions yet.</div></div>';
+      return;
+    }
+
+    salesContainer.innerHTML = sales.map(sale => {
+      const dateObj = new Date(sale.created_at);
+      const dateStr = dateObj.toLocaleDateString();
+      const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      return `
+        <div class="sale-item" style="padding: 20px; border-bottom: 1px solid rgba(0,0,0,0.05); display:flex; justify-content:space-between; gap: 8px;">
+          <div style="flex: 1;">
+            <div style="font-weight: 700; font-size: 15px;">${sale.receipt_id} - <span style="text-transform: capitalize;">${sale.payment_method || "cash"}</span> - ${timeStr}</div>
+            <div style="font-size: 13px; color: var(--muted);">${sale.items_count} items • ${dateStr}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 18px; font-weight: 800; color: var(--primary);">GHC ${Number(sale.total_amount || 0).toFixed(2)}</div>
+            <div style="font-size: 12px; color: var(--muted);">✓ Completed</div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+  } catch (err) {
+    console.error("Failed to load history:", err);
+    salesHeader.textContent = "My Recent Transactions";
+    salesContainer.innerHTML = `
+      <div class="sale-item" style="padding: 20px; color: #dc2626;">
+        <div style="font-weight: 600;">Failed to load sales history.</div>
+        <div style="font-size: 13px;">${err.message}</div>
+      </div>
+    `;
+  }
+}
+
+function exportHistory() {
+  if (!currentHistorySales || currentHistorySales.length === 0) {
+    alert("No transactions to export for this period.");
+    return;
+  }
+  
+  const headers = ["Receipt ID", "Payment Method", "Items Count", "Total Amount (GHC)", "Date", "Time"];
+  const rows = currentHistorySales.map(sale => {
+    const dateObj = new Date(sale.created_at);
+    return [
+      sale.receipt_id,
+      sale.payment_method || "cash",
+      sale.items_count,
+      Number(sale.total_amount || 0).toFixed(2),
+      dateObj.toLocaleDateString(),
+      dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    ];
+  });
+  
+  const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `My_Sales_History_${new Date().toISOString().slice(0, 10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.addEventListener('DOMContentLoaded', fetchAndRenderSales);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../scripts/supabase.js"></script>
+<script src="../scripts/auth-guard.js"></script>
+<script src="../scripts/user-profile.js"></script>
+<script src="../scripts/sidebar-highlight.js"></script>
+</body>
+</html>

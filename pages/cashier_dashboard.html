@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POSify - Cashier Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../styles/cashier_dashboard.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- SIDEBAR - Dashboard first -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">POS</div>
+      <div class="sidebar-brand">POSify</div>
+    </div>
+    <div class="sidebar-nav">
+      <a href="cashier_dashboard.html" class="sidebar-link">Dashboard</a>
+      <a href="product_management.html" class="sidebar-link" data-role-cashier>Products</a>
+      <a href="cashier_checkout.html" class="sidebar-link">New Sale</a>
+
+      <a href="cashier_history.html" class="sidebar-link">History</a>
+
+    </div>
+    
+    <div class="sidebar-footer">
+
+      <a href="#" onclick="logout()" class="sidebar-link">Logout</a>
+
+    </div>
+  </div>
+
+  <!-- MAIN - Cashier Personal Dashboard -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="welcome-text">My Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <div class="profile-circle">
+          <i class="fa-solid fa-user"></i>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">Cashier Name</div>
+          <div class="profile-role">Cashier</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TODAY'S PERSONAL STATS - Admin/Manager card style -->
+    <div class="stats-grid">
+      <div class="stat-card cashier-stat">
+        <div class="stat-badge" id="salesTodayBadge">0</div>
+        <div class="stat-info">
+          <h4>Sales Today</h4>
+          <p>Transactions processed</p>
+        </div>
+        <div class="stat-value" id="salesTodayValue">0</div>
+      </div>
+      <div class="stat-card cashier-stat">
+        <div class="stat-badge" id="totalSalesBadge">All</div>
+        <div class="stat-info">
+          <h4>Total Sales</h4>
+          <p>All payment methods</p>
+        </div>
+        <div class="stat-value" id="totalSalesValue">GHC 0.00</div>
+      </div>
+      <div class="stat-card cashier-stat">
+        <div class="stat-badge" id="lastSaleBadge">--:--</div>
+        <div class="stat-info">
+          <h4>Last Sale</h4>
+          <p>Completed</p>
+        </div>
+        <div class="stat-value" id="lastSaleValue">N/A</div>
+      </div>
+<div class="stat-card cashier-stat">
+        <div class="stat-badge" id="cashDrawerBadge">Cash</div>
+        <div class="stat-info">
+          <h4>Till Balance</h4>
+          <p>Physical cash only</p>
+        </div>
+        <div class="stat-value" id="cashDrawerValue">GHC 0.00</div>
+      </div>
+    </div>
+
+    <div class="dashboard-grid">
+      <!-- My Hourly Sales Chart -->
+      <div class="dashboard-column">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">My Hourly Sales</span>
+          </div>
+          <div class="chart-container" style="height: 280px;">
+            <canvas id="hourlyChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Stats / Recent Activity - More useful for cashier -->
+      <div class="dashboard-column">
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">My Weekly Shift Status</span>
+          </div>
+          <div class="shift-stats-grid">
+            <div class="shift-stat-row">
+              <span class="shift-stat-label">This Week Hours</span>
+              <span class="shift-stat-value" id="thisWeekHours">0 hrs</span>
+            </div>
+            <div class="shift-stat-row">
+              <span class="shift-stat-label">Shifts Worked</span>
+              <span class="shift-stat-value" id="shiftsWorked">0</span>
+            </div>
+            <div class="shift-stat-row">
+              <span class="shift-stat-label">Avg Shift Length</span>
+              <span class="shift-stat-value" id="avgShiftLength">0 hrs</span>
+            </div>
+            <div class="shift-stat-row">
+              <span class="shift-stat-label">Next Shift</span>
+              <span class="shift-stat-value" id="nextShiftValue">Check Schedule</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // DOM Elements for stats
+  const salesTodayBadge = document.getElementById('salesTodayBadge');
+  const salesTodayValue = document.getElementById('salesTodayValue');
+  const totalSalesBadge = document.getElementById('totalSalesBadge');
+  const totalSalesValue = document.getElementById('totalSalesValue');
+  const lastSaleBadge = document.getElementById('lastSaleBadge');
+  const lastSaleValue = document.getElementById('lastSaleValue');
+  const cashDrawerBadge = document.getElementById('cashDrawerBadge');
+  const cashDrawerValue = document.getElementById('cashDrawerValue');
+
+  const thisWeekHoursEl = document.getElementById('thisWeekHours');
+  const shiftsWorkedEl = document.getElementById('shiftsWorked');
+  const avgShiftLengthEl = document.getElementById('avgShiftLength');
+
+  // Chart instance
+  let hourlyChart = null;
+
+  function formatMoney(value) {
+    return `GHC ${Number(value || 0).toFixed(2)}`;
+  }
+
+  function timeAgo(sale) {
+    if (!sale || !sale.created_at) return "N/A";
+    const saleTime = new Date(sale.created_at);
+    if (!saleTime) return "N/A";
+
+    const now = new Date();
+    const seconds = Math.floor((now - saleTime) / 1000);
+    
+    if (seconds < 60) return "Just now";
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes} min ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} hr ago`;
+    const days = Math.floor(hours / 24);
+    return `${days} day(s) ago`;
+  }
+  
+  function processSalesForHourlyChart(sales) {
+    const hourlySales = {};
+    // Initialize hours from 8 AM to 9 PM (21:00)
+    for (let i = 8; i <= 21; i++) {
+        hourlySales[i] = 0;
+    }
+
+    sales.forEach(sale => {
+      if (sale.created_at) {
+        const saleTime = new Date(sale.created_at);
+        const hour = saleTime.getHours();
+        if (hourlySales.hasOwnProperty(hour)) {
+          hourlySales[hour] += 1; // Counting number of transactions
+        }
+      }
+    });
+
+    const labels = Object.keys(hourlySales).map(h => {
+        const hour = parseInt(h);
+        if (hour === 12) return '12PM';
+        if (hour > 12) return `${hour - 12}PM`;
+        return `${hour}AM`;
+    });
+    const data = Object.values(hourlySales);
+
+    return { labels, data };
+  }
+
+  function initializeChart() {
+    const ctx = document.getElementById('hourlyChart')?.getContext('2d');
+    if (!ctx) return;
+
+    hourlyChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [], // Will be populated dynamically
+        datasets: [{
+          label: 'My Sales',
+          data: [], // Will be populated dynamically
+          borderColor: 'var(--primary)',
+          backgroundColor: 'rgba(59,130,246,0.1)',
+          tension: 0.4,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { 
+          y: { 
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1 // Ensure y-axis shows whole numbers for transaction counts
+            }
+          } 
+        }
+      }
+    });
+  }
+
+  async function loadAndRenderDashboard() {
+    try {
+      const { data: { session } } = await window.supabase.auth.getSession();
+      if (!session?.user?.id) throw new Error("Not logged in.");
+
+      // Fetch sales from Supabase for the current cashier
+      const { data: rawSales, error } = await window.supabase
+        .from('sales')
+        .select('*')
+        .eq('cashier_id', session.user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      // Map Supabase data to the format the dashboard script expects
+      const allSales = (rawSales || []).map(sale => {
+        const dateObj = new Date(sale.created_at);
+        return {
+          id: sale.receipt_id,
+          date: new Date(dateObj.getTime() - (dateObj.getTimezoneOffset() * 60000)).toISOString().slice(0, 10), // Safe local date
+          total: parseFloat(sale.total_amount) || 0,
+          cashier: sale.cashier_name,
+          paymentMethod: sale.payment_method,
+          created_at: sale.created_at
+        };
+      });
+
+      const today = new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 10);
+      const mySalesToday = allSales.filter(sale => sale.date === today);
+
+      // --- Update Stats ---
+      const salesCount = mySalesToday.length;
+      const totalRevenue = mySalesToday.reduce((sum, sale) => sum + sale.total, 0);
+      
+      // Till balance should only include physical cash transactions
+      const cashDrawerTotal = mySalesToday
+        .filter(sale => {
+          const method = (sale.paymentMethod || 'cash').toLowerCase().trim();
+          return method === 'cash';
+        })
+        .reduce((sum, sale) => sum + sale.total, 0);
+
+      const lastSale = mySalesToday[0]; // Already sorted descending
+
+      salesTodayBadge.textContent = salesCount;
+      salesTodayValue.textContent = salesCount;
+      totalSalesBadge.textContent = "All";
+      totalSalesValue.textContent = formatMoney(totalRevenue);
+      cashDrawerBadge.textContent = "Cash";
+      cashDrawerValue.textContent = formatMoney(cashDrawerTotal);
+
+      if (lastSale) {
+        const saleTime = new Date(lastSale.created_at);
+        lastSaleBadge.textContent = saleTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        lastSaleValue.textContent = timeAgo(lastSale);
+      } else {
+        lastSaleBadge.textContent = '--:--';
+        lastSaleValue.textContent = 'No sales yet';
+      }
+      
+      // --- Weekly Shift Status ---
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + (startOfWeek.getDay() === 0 ? -6 : 1)); // Adjust to Monday
+      startOfWeek.setHours(0, 0, 0, 0);
+
+      const mySalesThisWeek = allSales.filter(sale => new Date(sale.created_at) >= startOfWeek);
+      
+      // Group sales by day to calculate actual shift duration based on first and last sale
+      const salesByDay = {};
+      mySalesThisWeek.forEach(sale => {
+        const day = sale.date;
+        const time = new Date(sale.created_at).getTime();
+        if (!salesByDay[day]) {
+          salesByDay[day] = { first: time, last: time };
+        } else {
+          if (time < salesByDay[day].first) salesByDay[day].first = time;
+          if (time > salesByDay[day].last) salesByDay[day].last = time;
+        }
+      });
+
+      let totalHours = 0;
+      const shiftsWorked = Object.keys(salesByDay).length;
+      Object.values(salesByDay).forEach(shift => {
+        let hours = (shift.last - shift.first) / (1000 * 60 * 60);
+        if (hours < 4) hours = 4; // Assume at least a 4-hour minimum shift if sales were clustered closely
+        totalHours += hours;
+      });
+
+      const avgShiftLength = shiftsWorked > 0 ? (totalHours / shiftsWorked) : 0;
+
+      thisWeekHoursEl.textContent = `${Math.round(totalHours)} hrs`;
+      shiftsWorkedEl.textContent = shiftsWorked;
+      avgShiftLengthEl.textContent = `${avgShiftLength.toFixed(1)} hrs`;
+
+      // --- Update Chart ---
+      if (hourlyChart) {
+        const { labels, data } = processSalesForHourlyChart(mySalesToday);
+        hourlyChart.data.labels = labels;
+        hourlyChart.data.datasets[0].data = data;
+        hourlyChart.update();
+      }
+    } catch (err) {
+      console.error("Failed to load cashier dashboard:", err);
+      salesTodayValue.textContent = 'Error';
+      totalSalesValue.textContent = 'Error';
+      lastSaleValue.textContent = 'Error';
+      cashDrawerValue.textContent = 'Error';
+    }
+  }
+
+  // --- Initialize ---
+  initializeChart();
+  loadAndRenderDashboard();
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../scripts/supabase.js"></script>
+<script src="../scripts/auth-guard.js"></script>
+<script src="../scripts/user-profile.js"></script>
+<script src="../scripts/sidebar-highlight.js"></script>
+</body>
+
+</html>

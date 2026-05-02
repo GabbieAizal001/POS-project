@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POSify - Employee Management</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../styles/a_Dashboard.css"/>
+  <link rel="stylesheet" href="../styles/employee_management.css"/>
+</head>
+<body>
+<div class="container">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">POS</div>
+      <div class="sidebar-brand">POSify</div>
+    </div>
+    <div class="sidebar-nav">
+      <a href="admin_dashboard.html" class="sidebar-link">Dashboard</a>
+      <a href="employee_management.html?role=admin" class="sidebar-link active">Employee</a>
+      <a href="inventory.html?role=admin" class="sidebar-link">Inventory</a>
+      <a href="customer_management.html?role=admin" class="sidebar-link">Customers</a>
+      <a href="reports.html" class="sidebar-link">Reports</a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="login.html" class="sidebar-link">Logout</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="welcome-text">Employee Management</span>
+      </div>
+      <div class="topbar-right">
+        <div class="profile-circle">
+          <i class="fa-solid fa-user-shield"></i>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">Admin</div>
+          <div class="profile-role">Administrator</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="stats-grid employee-stats">
+        <div class="stat-card">
+          <div class="stat-badge" id="totalEmployeesBadge">0</div>
+          <div class="stat-info">
+            <h4>Total Employees</h4>
+            <p>All active staff records</p>
+          </div>
+          <div class="stat-value" id="totalEmployeesValue">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-badge" id="cashierCountBadge">0</div>
+          <div class="stat-info">
+            <h4>Cashiers</h4>
+            <p>Assigned to checkout</p>
+          </div>
+          <div class="stat-value" id="cashierCountValue">0</div>
+        </div>
+      </div>
+
+      <div class="card full-width">
+        <div class="card-header employee-header">
+          <span class="card-title">Employees</span>
+          <div class="employee-header-actions">
+            <input id="employeeSearchInput" type="text" placeholder="Search by name, role, ID..." class="search-input"/>
+            <button id="addEmployeeBtn" type="button" class="btn-primary">
+              <i class="fa-solid fa-plus"></i> Add Employee
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-wrap">
+            <table class="employees-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Role</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Employee ID</th>
+                  <th>Password</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="employeesTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="employeeModalOverlay" class="modal-overlay hidden">
+  <div class="modal-card">
+    <button type="button" class="modal-close" id="closeEmployeeModalBtn">&times;</button>
+    <h3 id="employeeModalTitle">Add Employee</h3>
+    <form id="employeeForm">
+      <div class="modal-field">
+        <label for="employeeNameInput">Full Name</label>
+        <input id="employeeNameInput" type="text" required />
+      </div>
+      <div class="modal-field">
+        <label for="employeeRoleInput">Role</label>
+        <select id="employeeRoleInput" required>
+          <option value="Cashier">Cashier</option>
+          <option value="Manager">Manager</option>
+          <option value="Stock Clerk">Stock Clerk</option>
+        </select>
+      </div>
+      <div class="modal-field">
+        <label for="employeePhoneInput">Phone</label>
+        <input id="employeePhoneInput" type="text" required />
+      </div>
+      <div class="modal-field">
+        <label for="employeeEmailInput">Email</label>
+        <input id="employeeEmailInput" type="email" required />
+      </div>
+      <div class="modal-field">
+        <label for="tempPasswordInput">Set New Temp Password (optional, will be hashed)</label>
+        <input id="tempPasswordInput" type="password" placeholder="e.g. ChangeMe123" />
+        <small style="display: block; font-size: 12px; color: #666; margin-top: 4px;">Leave blank to keep current. Auto-hashed on save.</small>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-secondary" id="cancelEmployeeModalBtn">Cancel</button>
+        <button type="submit" class="btn-primary">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../scripts/supabase.js"></script>
+<script src="../scripts/auth-guard.js"></script>
+<script src="../scripts/user-profile.js"></script>
+<script src="../scripts/employee_management.js"></script>
+</body>
+</html>

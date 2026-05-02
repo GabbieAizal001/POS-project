@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>POS Inventory</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/inventory.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../scripts/supabase.js"></script>
+<script src="../scripts/app.js"></script>
+<script src="../scripts/auth-guard.js"></script>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-logo">POS</div>
+    <div class="sidebar-brand">POSify</div>
+  </div>
+
+  <div class="sidebar-nav">
+    <!-- Admin inventory access -->
+    <a href="admin_dashboard.html" class="sidebar-link" data-role-admin>Dashboard</a>
+    <a href="employee_management.html?role=admin" class="sidebar-link" data-role-admin>Employee</a>
+    <a href="inventory.html?role=admin" class="sidebar-link active" data-role-admin>Inventory</a>
+    <a href="customer_management.html?role=admin" class="sidebar-link" data-role-admin>Customers</a>
+    <a href="reports.html" class="sidebar-link" data-role-admin>Reports</a>
+
+    <!-- Manager inventory access -->
+    <a href="manager_dashboard.html?role=manager" class="sidebar-link" data-role-manager>Dashboard</a>
+    <a href="inventory.html?role=manager" class="sidebar-link active" data-role-manager>Inventory</a>
+    <a href="customer_management.html?role=manager" class="sidebar-link" data-role-manager>View Customers</a>
+    <a href="manager_sales_report.html?role=manager" class="sidebar-link" data-role-manager>Sales Report</a>
+
+    <!-- Cashier - limited or no inventory access -->
+    <a href="cashier_dashboard.html" class="sidebar-link" data-role-cashier>Dashboard</a>
+    <a href="cashier_checkout.html" class="sidebar-link" data-role-cashier>New Sale</a>
+    <a href="cashier_history.html" class="sidebar-link" data-role-cashier>History</a>
+  </div>
+
+  <div class="sidebar-footer">
+    <a href="login.html" class="sidebar-link">Logout</a>
+  </div>
+
+</div>
+
+
+<!-- MAIN AREA -->
+<div class="main">
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-left">
+    <span class="welcome-text">Welcome</span>
+  </div>
+  <div class="topbar-right">
+    <div class="profile-circle">👤</div>
+    <div class="profile-info">
+      <div class="profile-name">User Name</div>
+      <div class="profile-role">Role</div>
+    </div>
+    
+  </div>
+</div>
+
+
+<div class="content">
+
+<!-- CATEGORY -->
+<div class="category">
+
+  <div class="category-header">
+    <span class="category-title">Category</span>
+  <button onclick="addCategory()"><i class="fa-solid fa-circle-plus" style="color: black; font-size: 24px;"></i></button>
+  </div>
+
+  <div id="categoryEmpty" class="empty-state">
+    <div class="empty-title">No categories yet</div>
+    <div class="empty-subtitle">Click the + button to create one</div>
+  </div>
+
+  <div id="categoryList" class="category-list"></div>
+
+</div>
+
+
+<!-- ITEMS -->
+<div class="items-area">
+
+  <div class="items-header">
+    <h2>Manage items</h2>
+
+    <div class="items-controls">
+      <input
+        id="query"
+        class="input"
+        type="search"
+        placeholder="Search..."
+        name="searchbar"
+      />
+    </div>
+  </div>
+
+  <div class="items-container grid-bg">
+    <div class="items-grid" id="itemsGrid">
+
+      <!-- ADD ITEM CARD -->
+      <div class="add-card hidden" onclick="addItem()">
+        <div class="add-card-icon">+</div>
+        <div class="add-card-title">Add new item to</div>
+        <div class="add-card-subtitle">Selected category</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ADD ITEM MODAL -->
+<div id="itemModalOverlay" class="modal-overlay">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeItemModal()">&times;</button>
+    <h3>Add Item</h3>
+
+    <div class="modal-field">
+      <label for="itemNameInput">Item Name</label>
+      <input id="itemNameInput" type="text" />
+      <span class="error-message">Item name is required.</span>
+    </div>
+
+<div class="modal-field">
+      <label for="barcodeInput">Barcode</label>
+      <input id="barcodeInput" type="text" maxlength="25" />
+      <span class="error-message">Barcode is required (max 25 characters).</span>
+    </div>
+
+
+
+    <div class="modal-field">
+      <label for="priceInput">Price</label>
+      <input id="priceInput" type="text" />
+      <span class="error-message">Price must be a number.</span>
+    </div>
+
+    <div class="modal-field">
+      <label for="quantityInput">Quantity</label>
+      <input id="quantityInput" type="text" />
+      <span class="error-message">Quantity must be a number.</span>
+    </div>
+
+    <div class="modal-field">
+      <label for="taxRateInput">Tax Rate (%)</label>
+      <input id="taxRateInput" type="number" min="0" max="100" step="0.1" />
+      <span class="error-message">Tax rate required (0-100%).</span>
+    </div>
+
+    <div class="modal-field">
+      <label for="unitInput">Unit of Measure</label>
+      <input id="unitInput" type="text" placeholder="e.g. 1.5L, 500ml, kg" />
+      <span class="error-message">Unit required.</span>
+    </div>
+
+    <div class="modal-field">
+      <label for="discountInput">Discount Eligibility</label>
+      <select id="discountInput">
+        <option value="">Select...</option>
+        <option value="platinum">Platinum Only</option>
+        <option value="gold">Gold Only</option>
+        <option value="silver">Silver Only</option>
+        <option value="all">All Tiers</option>
+        <option value="none">None</option>
+      </select>
+      <span class="error-message">Discount eligibility required.</span>
+    </div>
+
+    <button id="saveItemBtn" class="primary-btn" onclick="saveItemFromModal()">Save</button>
+  </div>
+</div>
+
+<!-- ITEM ACTION (RENAME / DELETE) MODAL -->
+<div id="itemActionOverlay" class="modal-overlay">
+  <div class="modal-card">
+    <button type="button" class="modal-close" onclick="closeItemActionModal()">&times;</button>
+    <h3>Edit Item</h3>
+
+    <div class="modal-field">
+      <label for="editItemNameInput">Item Name</label>
+      <input id="editItemNameInput" type="text" disabled />
+      <span class="error-message">Item name is required.</span>
+    </div>
+
+<div class="modal-field">
+      <label for="editItemBarcodeInput">Barcode</label>
+      <input id="editItemBarcodeInput" type="text" maxlength="25" disabled />
+      <span class="error-message">Barcode is required (max 25 characters).</span>
+    </div>
+
+
+
+    <div class="modal-field">
+      <label for="editItemPriceInput">Price</label>
+      <input id="editItemPriceInput" type="text" />
+      <span class="error-message">Price must be a number.</span>
+    </div>
+
+    <div class="modal-field">
+      <label for="editItemQuantityInput">Quantity</label>
+      <input id="editItemQuantityInput" type="text" />
+      <span class="error-message">Quantity must be a number.</span>
+    </div>
+
+    <div class="modal-field">
+      <label for="editTaxRateInput">Tax Rate (%)</label>
+      <input id="editTaxRateInput" type="number" min="0" max="100" step="0.1" />
+      <span class="error-message">Tax rate required (0-100%).</span>
+    </div>
+
+    <div class="modal-field">
+      <label for="editUnitInput">Unit of Measure</label>
+      <input id="editUnitInput" type="text" placeholder="e.g. 1.5L, 500ml, kg" />
+      <span class="error-message">Unit required.</span>
+    </div>
+
+    <div class="modal-field">
+      <label for="editDiscountInput">Discount Eligibility</label>
+      <select id="editDiscountInput">
+        <option value="">Select...</option>
+        <option value="platinum">Platinum Only</option>
+        <option value="gold">Gold Only</option>
+        <option value="silver">Silver Only</option>
+        <option value="all">All Tiers</option>
+        <option value="none">None</option>
+      </select>
+      <span class="error-message">Discount eligibility required.</span>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-danger" onclick="deleteCurrentItem()">Delete</button>
+      <button type="button" class="btn btn-secondary" onclick="closeItemActionModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="saveItemEdit()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CATEGORY MODAL -->
+<div id="categoryModalOverlay" class="modal-overlay">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeCategoryModal()">&times;</button>
+    <h3>Add Category</h3>
+
+    <div class="modal-field">
+      <label for="categoryNameInput">Category Name</label>
+      <input id="categoryNameInput" type="text" />
+      <span class="error-message">Category name is required.</span>
+    </div>
+
+    <button id="saveCategoryBtn" class="primary-btn" onclick="saveCategoryFromModal()">Save</button>
+  </div>
+</div>
+
+<!-- CATEGORY ACTION (RENAME / DELETE) MODAL -->
+<div id="categoryActionOverlay" class="modal-overlay">
+  <div class="modal-card">
+    <button type="button" class="modal-close" onclick="closeCategoryActionModal()">&times;</button>
+    <h3>Edit Category</h3>
+
+    <div class="modal-field">
+      <label for="renameCategoryInput">Category name</label>
+      <input id="renameCategoryInput" type="text" />
+      <span class="error-message">Name cannot be empty.</span>
+    </div>
+
+    <div class="modal-actions">
+      <button type="button" class="btn btn-danger" onclick="deleteCurrentCategory()">Delete</button>
+      <button type="button" class="btn btn-secondary" onclick="closeCategoryActionModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" onclick="renameCurrentCategory()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>  
+  // Run immediately to completely remove unauthorized links from the HTML
+  (function filterSidebar() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const role = urlParams.get('role') || localStorage.getItem('userRole') || 'admin';
+    const currentRole = role || 'admin';
+    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+      if (link.hasAttribute('data-role-admin') || link.hasAttribute('data-role-manager') || link.hasAttribute('data-role-cashier')) {
+        if (!link.hasAttribute(`data-role-${currentRole}`)) {
+          link.remove(); // Safer than display:none
+        }
+      }
+    });
+  })();
+</script>
+<script src="../scripts/dashboard.js"></script>
+<script src="../scripts/inventory.js"></script>
+<script src="../scripts/user-profile.js"></script>
+<script src="../scripts/sidebar-highlight.js"></script>
+
+</body>
+</html>

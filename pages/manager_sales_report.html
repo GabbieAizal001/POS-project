@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POSify - Manager Sales Report</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../styles/manager_dashboard.css"/>
+  <link rel="stylesheet" href="../styles/manager_sales_report.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    .hidden { display: none !important; }
+    .stat-card.danger { border: 1px solid rgba(239, 68, 68, 0.3); background: #fef2f2; }
+    .stat-card.danger .stat-badge { background: #fee2e2; color: #ef4444; }
+    .stat-card.danger .stat-value { color: #ef4444; }
+    .filter-row { display: flex; gap: 12px; align-items: center; margin-bottom: 24px; flex-wrap: wrap; }
+
+    /* Print-Only Elements */
+    .print-only { display: none; }
+
+    @media print {
+      .sidebar, .topbar, .filter-row, #expenseModalOverlay, .item-menu-btn { display: none !important; }
+      .main { padding: 0 !important; margin: 0 !important; width: 100% !important; }
+      body { background: white !important; color: black !important; font-size: 11pt !important; }
+      
+      /* Professional Print Header */
+      .print-only { display: block !important; text-align: center; margin-bottom: 30px; }
+      .print-only h2 { margin: 0 0 8px; font-size: 22pt; font-weight: 700; color: #000; letter-spacing: 0.5px; }
+      .print-only p { margin: 4px 0; font-size: 11pt; color: #444; }
+      .print-only hr { margin-top: 20px; border: none; border-bottom: 2px solid #000; }
+
+      /* Stat Cards Restyling for Paper */
+      .report-stats { display: flex !important; justify-content: space-between !important; gap: 15px !important; margin-bottom: 30px !important; }
+      .stat-card { flex: 1 !important; background: white !important; border: 1px solid #000 !important; border-radius: 8px !important; padding: 15px !important; box-shadow: none !important; height: auto !important; }
+      .stat-card .stat-badge { display: none !important; } /* Hide floating web badges */
+      .stat-card .stat-value { color: #000 !important; font-size: 18pt !important; margin-top: 10px !important; font-weight: bold !important; }
+      .stat-card .stat-info h4 { color: #000 !important; font-size: 11pt !important; font-weight: bold !important; }
+      .stat-card .stat-info p { color: #333 !important; font-size: 9pt !important; margin-top: 2px !important; }
+
+      /* Card & Table Reset */
+      .card { background: white !important; border: none !important; box-shadow: none !important; page-break-inside: avoid; margin-bottom: 40px !important; }
+      .card-header { background: white !important; border-bottom: 2px solid #000 !important; padding: 0 0 10px 0 !important; margin-bottom: 15px !important; }
+      .card-title { font-size: 14pt !important; color: #000 !important; font-weight: bold !important; }
+      .table-wrap { overflow: visible !important; }
+      
+      /* Formal Table Styling */
+      .sales-table { width: 100% !important; border-collapse: collapse !important; border: 1px solid #000 !important; }
+      .sales-table th, .sales-table td { border: 1px solid #000 !important; padding: 10px !important; text-align: left !important; color: #000 !important; }
+      .sales-table th { background-color: #f4f4f4 !important; font-weight: bold !important; }
+      .sales-table td span { background: transparent !important; color: #000 !important; border: none !important; padding: 0 !important; font-weight: normal !important; box-shadow: none !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">POS</div>
+      <div class="sidebar-brand">POSify</div>
+    </div>
+    <div class="sidebar-nav">
+      <a href="manager_dashboard.html?role=manager" class="sidebar-link">Dashboard</a>
+<a href="inventory.html?role=manager" class="sidebar-link">Inventory</a>
+      <a href="manager_sales_report.html?role=manager" class="sidebar-link active">Sales Report</a>
+      <a href="customer_management.html?role=manager&amp;mode=view" class="sidebar-link">View Customers</a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="login.html" class="sidebar-link">Logout</a>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="welcome-text">Sales Report</span>
+      </div>
+      <div class="topbar-right">
+        <div class="profile-circle">
+          <i class="fa-solid fa-user-tie"></i>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">Manager Name</div>
+          <div class="profile-role">Manager</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      
+      <!-- Print-Only Header -->
+      <div id="printHeader" class="print-only">
+        <h2>Business Sales & Expense Report</h2>
+        <p id="printDateRange">Date Range: All Time</p>
+        <p id="printGeneratedAt">Generated: --</p>
+        <hr>
+      </div>
+
+      <div class="filter-row">
+        <input id="fromDateInput" type="date" />
+        <input id="toDateInput" type="date" />
+        <button id="applyFiltersBtn" type="button" class="btn-primary">Apply</button>
+        <button id="printReportBtn" type="button" class="btn-secondary"><i class="fa-solid fa-print"></i> Print</button>
+        <button id="addExpenseBtn" type="button" class="btn-secondary" style="margin-left: auto;"><i class="fa-solid fa-plus"></i> Add Expense</button>
+      </div>
+
+      <div class="stats-grid report-stats">
+        <div class="stat-card">
+          <div class="stat-badge">Revenue</div>
+          <div class="stat-info">
+            <h4>Total Sales</h4>
+            <p>For selected period</p>
+          </div>
+          <div class="stat-value" id="totalSalesValue">GHC 0.00</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-badge">Items</div>
+          <div class="stat-info">
+            <h4>Total Items Sold</h4>
+            <p>During selected period</p>
+          </div>
+          <div class="stat-value" id="totalItemsSoldValue">0</div>
+        </div>
+        <div class="stat-card warning">
+          <div class="stat-badge">Stock</div>
+          <div class="stat-info">
+            <h4>Current Inventory</h4>
+            <p>Total items left in stock</p>
+          </div>
+          <div class="stat-value" id="totalStockValue">0</div>
+        </div>
+        <div class="stat-card danger">
+          <div class="stat-badge">Spent</div>
+          <div class="stat-info">
+            <h4>Total Expenses</h4>
+            <p>Business purchases</p>
+          </div>
+          <div class="stat-value" id="totalExpensesValue">GHC 0.00</div>
+        </div>
+      </div>
+
+      <div class="card full-width">
+        <div class="card-header">
+          <span class="card-title">Daily Sales Trend</span>
+        </div>
+        <div class="card-body">
+          <canvas id="salesTrendChart" height="110"></canvas>
+        </div>
+      </div>
+
+      <div class="card full-width table-card">
+        <div class="card-header">
+          <span class="card-title">Sales Records</span>
+        </div>
+        <div class="card-body table-wrap">
+          <table class="sales-table">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Barcode</th>
+                <th>Sold Qty</th>
+                <th>In Stock (Left)</th>
+                <th>Revenue (GHC)</th>
+              </tr>
+            </thead>
+            <tbody id="salesRecordsTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card full-width table-card" style="margin-top: 24px;">
+        <div class="card-header">
+          <span class="card-title">Business Expenses & Purchases</span>
+        </div>
+        <div class="card-body table-wrap">
+          <table class="sales-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Added By</th>
+                <th>Amount (GHC)</th>
+              </tr>
+            </thead>
+            <tbody id="expensesTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Expense Modal -->
+<div id="expenseModalOverlay" class="hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);">
+  <div class="modal-card" style="background: white; padding: 28px; border-radius: 20px; width: 400px; max-width: 90%; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
+    <h3 style="margin-top: 0; margin-bottom: 20px; font-size: 20px;"><i class="fa-solid fa-receipt" style="color: var(--primary); margin-right: 8px;"></i> Add Business Expense</h3>
+    <form id="expenseForm">
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px;">Date</label>
+        <input type="date" id="expenseDate" required readonly style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 12px; box-sizing: border-box; font-family: inherit; background-color: #f1f5f9; color: #64748b; cursor: not-allowed; pointer-events: none;">
+      </div>
+      <div style="margin-bottom: 16px;">
+        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px;">Description (What was bought?)</label>
+        <input type="text" id="expenseDesc" required placeholder="e.g. Restocked printer paper, Paid electricity" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 12px; box-sizing: border-box; font-family: inherit;">
+      </div>
+      <div style="margin-bottom: 28px;">
+        <label style="display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px;">Amount (GHC)</label>
+        <input type="number" id="expenseAmount" required step="0.01" min="0" placeholder="0.00" style="width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 12px; box-sizing: border-box; font-family: inherit;">
+      </div>
+      <div style="display: flex; gap: 12px; justify-content: flex-end;">
+        <button type="button" id="cancelExpenseBtn" style="padding: 10px 20px; border: none; background: #f1f5f9; color: #475569; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.2s;">Cancel</button>
+        <button type="submit" style="padding: 10px 20px; border: none; background: var(--primary); color: white; font-weight: 600; border-radius: 12px; cursor: pointer; transition: 0.2s;">Save Expense</button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="../scripts/supabase.js"></script>
+<script src="../scripts/manager_sales_report.js"></script>
+<script src="../scripts/auth-guard.js"></script>
+<script src="../scripts/user-profile.js"></script>
+<script src="../scripts/sidebar-highlight.js"></script>
+</body>
+</html>

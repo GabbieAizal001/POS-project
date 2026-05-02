@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POSify - New Sale</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../styles/cashier_dashboard.css"/>
+  <link rel="stylesheet" href="../styles/cashier_checkout.css"/>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- SIDEBAR - Checkout page -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">POS</div>
+      <div class="sidebar-brand">POSify</div>
+    </div>
+    <div class="sidebar-nav">
+      <a href="cashier_dashboard.html" class="sidebar-link">Dashboard</a>
+      <a href="product_management.html" class="sidebar-link" data-role-cashier>Products</a>
+      <a href="cashier_checkout.html" class="sidebar-link">New Sale</a>
+
+      <a href="cashier_history.html" class="sidebar-link">History</a>
+    </div>
+    <div class="sidebar-footer">
+      <a href="#" onclick="logout()" class="sidebar-link">Logout</a>
+    </div>
+  </div>
+
+  <!-- CHECKOUT MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="welcome-text">Current Sale #001</span>
+      </div>
+      <div class="topbar-right">
+        <div class="profile-circle">
+          <i class="fa-solid fa-user"></i>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">Cashier Name</div>
+          <div class="profile-role">Cashier</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content content-cashier">
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <button id="scan-btn" class="quick-btn primary"><i class="fa-solid fa-barcode"></i> Scan Barcode</button>
+        <button class="quick-btn search-btn" onclick="openProductSearchModal(); highlightSidebar('cashier_checkout.html')"><i class="fa-solid fa-search"></i> Search Product or Barcode</button>
+        <button id="lookupCustomerBtn" class="quick-btn"><i class="fa-solid fa-user"></i> Look Up Customer</button>
+        <div id="status-msg" class="status-msg"></div>
+      </div>
+      <div id="scan-input-container" class="scan-input-container hidden">
+        <i class="fa-solid fa-barcode"></i>
+        <input type="text" id="barcodeScanInput" placeholder="Scanner active..." autocomplete="off">
+      </div>
+
+      <!-- Product Search Modal -->
+      <div id="productSearchModal" class="product-search-modal">
+        <div class="modal-overlay" onclick="closeProductSearchModal()"></div>
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3><i class="fa-solid fa-magnifying-glass"></i> Search Products</h3>
+            <button class="modal-close" onclick="closeProductSearchModal()">&times;</button>
+          </div>
+          <div class="modal-search">
+            <input type="text" id="searchInput" placeholder="Type barcode or product name..." oninput="filterProducts(this.value)">
+            <button class="search-clear" onclick="clearSearch()"><i class="fa-solid fa-times"></i></button>
+          </div>
+          <div class="products-grid" id="productsGrid">
+            <!-- Products populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Current Cart Summary -->
+      <div class="cart-summary">
+        <div class="cart-header">
+          <h3>Current Cart (0 items)</h3>
+          <button class="clear-cart">Clear All</button>
+        </div>
+        <div class="cart-items" id="cartItems">
+          <div class="empty-cart">
+            <i class="fa-solid fa-shopping-cart"></i>
+            <p>No items in cart</p>
+          </div>
+        </div>
+        <div class="cart-total">
+          <div class="total-row">
+            <span>Subtotal:</span>
+            <span>GHC 0.00</span>
+          </div>
+          <div class="total-row">
+            <span>VAT/Tax:</span>
+            <span>GHC 0.00</span>
+          </div>
+          <div class="total-row" id="discountRow" style="display: none; color: #059669; font-weight: 600;">
+            <span>VIP Discount:</span>
+            <span id="discountValue">-GHC 0.00</span>
+          </div>
+          <hr>
+          <div class="total-row grand">
+            <span>Total:</span>
+            <span>GHC 0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Section -->
+      <div class="payment-section card">
+        <div class="card-header">
+          <h3>Payment</h3>
+        </div>
+        <div class="payment-methods">
+          <button class="payment-btn active" data-method="cash">
+            <i class="fa-solid fa-money-bill-wave"></i> Cash
+          </button>
+          <button class="payment-btn" data-method="mobile">
+            <i class="fa-solid fa-mobile-alt"></i> Mobile Money
+          </button>
+        </div>
+        <div class="payment-amount">
+          <label>Amount Tendered:</label>
+          <div class="tender-input-group">
+            <input type="number" id="tenderedAmount" placeholder="0.00" step="0.01">
+            <button id="exactAmountBtn" class="exact-amount-btn" title="Tender exact amount">Exact</button>
+          </div>
+<div class="change-display" id="changeDisplay">Change: GHC 0.00</div>
+        </div>
+        <button class="checkout-btn" id="completeSale" disabled>Complete Sale</button>
+      </div>
+
+      <!-- Recent Sales (temporary - move to History) -->
+      <div class="recent-sales">
+        <h3>Recent Sales</h3>
+        <div class="sales-list">
+          <div class="sale-item">
+            <div class="sale-info">
+              <span>#001 - 10:30 AM (Cash)</span>
+              <span>3 items</span>
+            </div>
+            <span class="sale-amount">GHC 285.00</span>
+          </div>
+          <div class="sale-item">
+            <div class="sale-info">
+              <span>#002 - 10:25 AM (Mobile)</span>
+              <span>1 item</span>
+            </div>
+            <span class="sale-amount">GHC 45.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SALES_STORAGE_KEY = "posSalesRecords";
+const CASHIER_HISTORY_KEY = "posCashierSales";
+
+const cartItemsEl = document.getElementById("cartItems");
+const cartHeaderEl = document.querySelector(".cart-header h3");
+const subtotalEl = document.querySelector(".cart-total .total-row:nth-child(1) span:last-child");
+const taxEl = document.querySelector(".cart-total .total-row:nth-child(2) span:last-child");
+const totalEl = document.querySelector(".cart-total .total-row.grand span:last-child");
+const discountRowEl = document.getElementById("discountRow");
+const discountValueEl = document.getElementById("discountValue");
+const tenderedAmountInput = document.getElementById("tenderedAmount");
+const changeDisplayEl = document.querySelector(".change-display");
+const completeSaleBtn = document.getElementById("completeSale");
+
+let paymentMethod = "cash";
+let cart = [];
+
+let inventory = [];
+let selectedCustomer = null;
+
+async function fetchInventoryFromDB() {
+  try {
+    const { data, error } = await window.supabase
+      .from('inventory')
+      .select('*')
+      .order('item_name');
+      
+    if (error) throw error;
+    
+    inventory = (data || [])
+      .filter(item => item.quantity > 0)
+      .map(item => ({
+        id: item.id,
+        name: item.item_name,
+        barcode: item.barcode,
+        price: parseFloat(item.price),
+        tax_rate: parseFloat(item.tax_rate) || 0,
+        stock_quantity: item.quantity,
+        discount_eligibility: item.discount_eligibility || 'none'
+      }));
+  } catch (err) {
+    console.error("DB Fetch Error:", err);
+  }
+}
+
+// Barcode scanning functionality
+let isScanning = false;
+const scanBtn = document.getElementById('scan-btn');
+const statusMsg = document.getElementById('status-msg');
+const scanInputContainer = document.getElementById('scan-input-container');
+const barcodeScanInput = document.getElementById('barcodeScanInput');
+
+// Toggle scanning mode
+scanBtn.addEventListener('click', () => {
+    isScanning = !isScanning;
+    
+    if (isScanning) {
+        scanBtn.classList.add('active-scan');
+        scanBtn.innerHTML = '<i class="fa-solid fa-barcode"></i> Scanning Mode: ON';
+        statusMsg.textContent = "Scanner is active.";
+        statusMsg.classList.add('scanning');
+        scanInputContainer.classList.remove('hidden');
+        barcodeScanInput.value = "";
+        barcodeScanInput.focus();
+    } else {
+        scanBtn.classList.remove('active-scan');
+        scanBtn.innerHTML = '<i class="fa-solid fa-barcode"></i> Scan Barcode';
+        statusMsg.textContent = "Scan cancelled.";
+        statusMsg.classList.remove('scanning');
+        statusMsg.classList.add('cancelled');
+        scanInputContainer.classList.add('hidden');
+    }
+});
+
+// Listen for 'Enter' on the new input field
+barcodeScanInput.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault(); // Prevent form submission if it's in a form
+        const code = barcodeScanInput.value.trim();
+        if (code) {
+            processBarcode(code);
+        }
+        barcodeScanInput.value = ""; // Clear for next scan
+    }
+});
+
+function processBarcode(code) {
+    const match = inventory.find(p => p.barcode === code);
+    if (match) {
+        addItemToCart(match); // This already calls renderCart
+        showStatus(`Added: ${match.name}`);
+    } else {
+        showStatus("Product not found: " + code, true);
+    }
+}
+
+function addItemToCart(product) {
+  if (!product) return;
+  const existing = cart.find((item) => item.name === product.name);
+  
+  const currentCartQty = existing ? existing.qty : 0;
+  if (currentCartQty >= product.stock_quantity) {
+    showStatus(`Cannot add: Only ${product.stock_quantity} in stock!`, true);
+    return;
+  }
+
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    cart.push({ ...product, qty: 1 });
+  }
+  renderCart();
+}
+
+function formatMoney(value) {
+  return `GHC ${Number(value).toFixed(2)}`;
+}
+
+function getSubtotal() {
+  return cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+}
+
+function getTax() {
+  return cart.reduce((taxTotal, item) => {
+    const itemTaxRate = (item.tax_rate || 0) / 100;
+    const itemTax = item.price * itemTaxRate;
+    return taxTotal + (itemTax * item.qty);
+  }, 0);
+}
+
+function getDiscount() {
+  if (!selectedCustomer) return 0;
+  const tier = (selectedCustomer.tier || 'bronze').toLowerCase();
+  
+  let discountMultiplier = 0;
+  
+  // 5% for Silver, 10% for Gold, 15% for Platinum
+  if (tier === 'silver') discountMultiplier = 0.05;
+  else if (tier === 'gold') discountMultiplier = 0.10;
+  else if (tier === 'platinum') discountMultiplier = 0.15;
+  
+  if (discountMultiplier === 0) return 0;
+
+  return cart.reduce((discountTotal, item) => {
+    const eligibility = (item.discount_eligibility || 'none').toLowerCase().trim();
+    
+    // Check if the item is specifically eligible for this customer's tier
+    let isEligible = false;
+    if (eligibility === 'both' || eligibility === 'yes' || eligibility === 'all') {
+      isEligible = true; // Both tiers get their respective discounts
+    } else if (eligibility === 'platinum' && tier === 'platinum') {
+      isEligible = true; // Only Platinum get a discount on this item
+    } else if ((eligibility === 'gold' || eligibility === 'vip') && tier === 'gold') {
+      isEligible = true; // Only Gold get a discount on this item
+    } else if ((eligibility === 'silver' || eligibility === 'regular') && tier === 'silver') {
+      isEligible = true; // Only Silver get a discount on this item
+    }
+
+    if (isEligible) {
+       return discountTotal + (item.price * item.qty * discountMultiplier);
+    }
+    return discountTotal;
+  }, 0);
+}
+
+function getTotal() {
+  const subtotal = getSubtotal();
+  const tax = getTax();
+  const discount = getDiscount();
+  return Number((subtotal + tax - discount).toFixed(2));
+}
+
+function renderCart() {
+  if (cart.length === 0) {
+    cartItemsEl.innerHTML = `
+      <div class="empty-cart">
+        <i class="fa-solid fa-shopping-cart"></i>
+        <p>No items in cart</p>
+      </div>
+    `;
+  } else {
+    cartItemsEl.innerHTML = cart
+      .map(
+        (item, index) => `
+          <div class="cart-item-card">
+            <div class="item-icon"><i class="fa-solid fa-box"></i></div>
+            <div class="cart-item-content">
+              <div class="cart-item-details">
+                <div class="item-name">${item.name}</div>
+                <div class="item-price">${formatMoney(item.price)} each</div>
+              </div>
+              <div class="cart-item-actions">
+                <div class="qty-controls">
+                  <button type="button" class="qty-btn" onclick="changeQty(${index}, -1)">−</button>
+                  <span class="qty-display">${item.qty}</span>
+                  <button type="button" class="qty-btn" onclick="changeQty(${index}, 1)">+</button>
+                </div>
+                <div class="item-total">${formatMoney(item.price * item.qty)}</div>
+              </div>
+            </div>
+            <button type="button" data-remove-index="${index}" class="remove-btn"><i class="fa-solid fa-trash-alt"></i></button>
+          </div>
+        `
+      )
+      .join("");
+  }
+
+  const subtotal = getSubtotal();
+  const tax = getTax();
+  const discount = getDiscount();
+  const total = getTotal();
+
+  if (paymentMethod === "mobile") {
+    tenderedAmountInput.value = total > 0 ? total.toFixed(2) : '';
+    tenderedAmountInput.disabled = true;
+    document.getElementById('exactAmountBtn').disabled = true;
+  } else {
+    tenderedAmountInput.disabled = false;
+    document.getElementById('exactAmountBtn').disabled = false;
+  }
+
+  const tendered = Number(tenderedAmountInput.value || 0);
+  const change = Number(Math.max(0, tendered - total).toFixed(2));
+
+  cartHeaderEl.textContent = `Current Cart (${cart.reduce((sum, i) => sum + i.qty, 0)} items)`;
+  subtotalEl.textContent = formatMoney(subtotal);
+  taxEl.textContent = formatMoney(tax);
+  if (discount > 0) {
+    discountRowEl.style.display = "flex";
+    discountValueEl.textContent = `-${formatMoney(discount)}`;
+  } else {
+    discountRowEl.style.display = "none";
+  }
+  totalEl.textContent = formatMoney(total);
+  changeDisplayEl.textContent = `Change: ${formatMoney(change)}`;
+
+  completeSaleBtn.disabled = !(total > 0 && tendered >= total);
+}
+
+function changeQty(index, change) {
+  if (cart[index]) {
+    const newQty = cart[index].qty + change;
+    if (newQty > cart[index].stock_quantity) {
+      showStatus(`Cannot add: Only ${cart[index].stock_quantity} in stock!`, true);
+      return;
+    }
+    cart[index].qty = newQty;
+    if (cart[index].qty < 1) {
+      cart.splice(index, 1);
+    }
+    renderCart();
+  }
+}
+
+async function saveSaleRecord() {
+  const subtotal = getSubtotal();
+  const tax = getTax();
+  const discount = getDiscount();
+  const total = getTotal();
+  const itemsCount = cart.reduce((sum, item) => sum + item.qty, 0);
+  const now = new Date();
+  const tendered = Number(tenderedAmountInput.value || 0);
+  const change = Number(Math.max(0, tendered - total).toFixed(2));
+  const receiptId = `RCP-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}${String(now.getSeconds()).padStart(2, "0")}`;
+
+  // Get cashier info
+  const { data: { session } } = await window.supabase.auth.getSession();
+  const cashierName = localStorage.getItem('userName') 
+    || document.querySelector('.profile-name')?.textContent 
+    || 'Cashier';
+
+  // --- 1. SAVE SALE TO SUPABASE ---
+  const { data: saleData, error: saleError } = await window.supabase
+    .from('sales')
+    .insert([{
+      receipt_id: receiptId,
+      cashier_id: session?.user?.id || null,
+      cashier_name: cashierName,
+      total_amount: Number(total.toFixed(2)),
+      subtotal: Number(subtotal.toFixed(2)),
+      tax: Number(tax.toFixed(2)),
+      discount: Number(discount.toFixed(2)),
+      payment_method: paymentMethod,
+      items_count: itemsCount,
+      line_items: cart.map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        qty: item.qty,
+        tax_rate: item.tax_rate || 0,
+        total: Number((item.price * item.qty).toFixed(2))
+      }))
+    }])
+    .select()
+    .single();
+
+  if (saleError) {
+    console.error("Failed to save sale to Supabase:", saleError);
+    throw new Error("Failed to save sale: " + saleError.message);
+  }
+
+  console.log("Sale saved to Supabase:", saleData);
+
+  // --- 2. DEDUCT FROM SUPABASE INVENTORY ---
+  for (const item of cart) {
+    const newStock = Math.max(0, item.stock_quantity - item.qty);
+    const { error: stockError } = await window.supabase
+      .from('inventory')
+      .update({ quantity: newStock })
+      .eq('id', item.id);
+
+    if (stockError) {
+      console.error(`Failed to update stock for ${item.name}:`, stockError);
+      throw new Error(`Could not deduct stock for ${item.name}. Please check database permissions (RLS).`);
+    }
+  }
+
+  // --- 3. SAVE RECEIPT DATA TO localStorage (for receipt page only) ---
+  const receiptData = {
+    id: receiptId,
+    date: now.toISOString().slice(0, 10),
+    time: now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    cashier: cashierName,
+    customerName: selectedCustomer ? selectedCustomer.full_name : null,
+    customerPhone: selectedCustomer ? selectedCustomer.phone : null,
+    items: itemsCount,
+    total: Number(total.toFixed(2)),
+    paymentMethod,
+    lines: cart,
+    subtotal: Number(subtotal.toFixed(2)),
+    tax: Number(tax.toFixed(2)),
+    discount: Number(discount.toFixed(2)),
+    tendered: Number(tendered.toFixed(2)),
+    change: Number(change.toFixed(2)),
+  };
+  localStorage.setItem("lastReceipt", JSON.stringify(receiptData));
+  
+  // Clear selected customer for the next sale
+  sessionStorage.removeItem('selectedCustomer');
+}
+
+document.querySelectorAll(".payment-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".payment-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+    paymentMethod = btn.dataset.method || "cash";
+    renderCart(); // Recalculate and refresh display
+  });
+});
+
+document.getElementById('lookupCustomerBtn').addEventListener('click', () => {
+  window.location.href = 'cashier_customers.html';
+});
+
+document.querySelectorAll(".quick-btn").forEach((btn) => {
+  if (btn.id === 'lookupCustomerBtn') return;
+  btn.addEventListener("click", () => {
+    if (btn.classList.contains('search-btn') || btn.id === 'scan-btn') return;
+    alert(`Feature coming soon: ${btn.textContent.trim()}`);
+  });
+});
+
+document.querySelector(".clear-cart").addEventListener("click", () => {
+  cart = [];
+  renderCart();
+});
+
+cartItemsEl.addEventListener("click", (event) => {
+  const btn = event.target.closest("[data-remove-index]");
+  if (!btn) return;
+  const index = Number(btn.dataset.removeIndex);
+  cart.splice(index, 1);
+  renderCart();
+});
+
+tenderedAmountInput.addEventListener("input", renderCart);
+
+document.getElementById('exactAmountBtn').addEventListener('click', () => {
+    const total = getTotal();
+    tenderedAmountInput.value = total > 0 ? total.toFixed(2) : '';
+    renderCart(); // This will update the change and checkout button state
+});
+
+completeSaleBtn.addEventListener("click", async () => {
+  completeSaleBtn.disabled = true;
+  completeSaleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+  
+  const total = getTotal();
+
+  if (paymentMethod === "mobile") {
+    try {
+      if (typeof PaystackPop === 'undefined') {
+        throw new Error("Paystack library failed to load. Please check your internet connection, disable ad-blockers, or ensure you are using Live Server.");
+      }
+      
+      // Trigger Paystack Popup
+      let handler = PaystackPop.setup({
+        key: 'pk_live_581f46d31e605d9d705c0694862c6962ca5a3553', // Paystack Public Key
+        email: selectedCustomer && selectedCustomer.email ? selectedCustomer.email : 'walkin@posify.com', // Paystack requires an email
+        amount: Math.round(total * 100), // Paystack expects the amount in pesewas/kobo
+        currency: 'GHS',
+        ref: 'POS_' + Math.floor((Math.random() * 1000000000) + 1),
+        callback: function(response) {
+          // Payment was successful!
+          saveSaleRecord().then(() => {
+            window.location.href = "receipt.html";
+          }).catch(err => {
+            console.error("Sale failed to save:", err);
+            alert("Payment received, but failed to record sale: " + err.message);
+            completeSaleBtn.disabled = false;
+            completeSaleBtn.innerHTML = 'Complete Sale';
+          });
+        },
+        onClose: function() {
+          alert('Mobile Money payment cancelled.');
+          completeSaleBtn.disabled = false;
+          completeSaleBtn.innerHTML = 'Complete Sale';
+        }
+      });
+      handler.openIframe();
+    } catch (err) {
+      console.error("Paystack Error:", err);
+      alert(err.message);
+      completeSaleBtn.disabled = false;
+      completeSaleBtn.innerHTML = 'Complete Sale';
+    }
+  } else {
+    // Standard Cash Checkout
+    try {
+      await saveSaleRecord();
+      window.location.href = "receipt.html";
+    } catch (err) {
+      console.error("Sale failed:", err);
+      alert("Failed to complete sale: " + err.message);
+      completeSaleBtn.disabled = false;
+      completeSaleBtn.innerHTML = 'Complete Sale';
+    }
+  }
+});
+
+renderCart();
+
+// Product Search Modal Functions
+let searchResults = [];
+
+function openProductSearchModal() {
+  document.getElementById('productSearchModal').classList.add('open');
+  document.getElementById('searchInput').focus();
+  filterProducts('');
+}
+
+function closeProductSearchModal() {
+  document.getElementById('productSearchModal').classList.remove('open');
+  document.getElementById('searchInput').value = '';
+  filterProducts('');
+}
+
+function clearSearch() {
+  document.getElementById('searchInput').value = '';
+  filterProducts('');
+}
+
+function filterProducts(query = '') {
+  const lowerQuery = query.toLowerCase();
+  searchResults = inventory.filter(product => 
+    product.name.toLowerCase().includes(lowerQuery) || 
+    (product.barcode && product.barcode.toLowerCase().includes(lowerQuery))
+  );
+  renderProductGrid();
+}
+
+function renderProductGrid() {
+  const grid = document.getElementById('productsGrid');
+  if (searchResults.length === 0) {
+    grid.innerHTML = '<div class="no-results"><i class="fa-solid fa-box-open"></i><p>No products found</p></div>';
+    return;
+  }
+  
+  grid.innerHTML = searchResults.map(product => `
+    <div class="product-card" onclick="addProductToCart('${product.name.replace(/'/g, "\\'")}')">
+      <div class="product-icon"><i class="fa-solid fa-box"></i></div>
+      <div class="product-info">
+        <div class="product-name">${product.name}</div>
+        <div class="product-barcode">${product.barcode || 'N/A'}</div>
+      </div>
+      <div class="product-price">GHC ${product.price.toFixed(2)}</div>
+    </div>
+  `).join('');
+}
+
+function addProductToCart(productName) {
+  const product = inventory.find(p => p.name === productName);
+  if (product) {
+    const existing = cart.find(item => item.name === product.name);
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      cart.push({...product, qty: 1});
+    }
+    renderCart();
+    closeProductSearchModal();
+    showStatus(`Added: ${product.name}`);
+  }
+}
+
+function showStatus(message, isError = false) {
+  const status = document.getElementById('status-msg');
+  status.textContent = message;
+  status.classList.remove('success', 'error', 'scanning', 'cancelled');
+  status.classList.add(isError ? 'error' : 'success');
+  // Use a slightly longer timeout for better readability
+  setTimeout(() => status.classList.remove('success', 'error'), 2500);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  fetchInventoryFromDB();
+  
+  // Show selected customer on the UI if one exists
+  const selectedCustomerStr = sessionStorage.getItem('selectedCustomer');
+  if (selectedCustomerStr) {
+    try {
+      selectedCustomer = JSON.parse(selectedCustomerStr);
+      const lookupBtn = document.getElementById('lookupCustomerBtn');
+      lookupBtn.innerHTML = `<i class="fa-solid fa-user-check"></i> ${selectedCustomer.full_name}`;
+    } catch (e) {}
+  }
+});
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://js.paystack.co/v1/inline.js"></script>
+<script src="../scripts/supabase.js"></script>
+    <script src="../scripts/auth-guard.js"></script>
+  <script src="../scripts/user-profile.js"></script>
+  <script src="../scripts/sidebar-highlight.js"></script>
+
+<style>
+/* Styles for the new 'Exact' amount button */
+.tender-input-group {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.tender-input-group #tenderedAmount {
+  flex-grow: 1;
+}
+.exact-amount-btn {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  background: var(--secondary); /* Using theme color */
+  color: var(--primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.exact-amount-btn:hover {
+  background: var(--primary);
+  color: white;
+}
+.status-msg.error {
+  opacity: 1;
+  color: #dc2626; /* A strong, accessible red */
+  font-weight: 600;
+}
+.scan-input-container {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  padding: 10px 16px;
+  border-radius: 14px;
+  border: 2px solid var(--primary);
+  max-width: 320px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+.scan-input-container.hidden {
+  display: none;
+}
+.scan-input-container i {
+  color: var(--primary);
+  font-size: 18px;
+}
+#barcodeScanInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  width: 100%;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+}
+</style>
+
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>POSify - Manager Preferences</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="../styles/manager_dashboard.css"/>
+  <link rel="stylesheet" href="../styles/settings.css"/>
+  <script src="../scripts/settings.js" defer></script>
+</head>
+<body>
+
+<div class="container settings-container">
+
+  <!-- SIDEBAR - Manager style -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">POS</div>
+      <div class="sidebar-brand">POSify</div>
+    </div>
+
+    <div class="sidebar-nav">
+      <a href="manager_dashboard.html" class="sidebar-link">Dashboard</a>
+      <a href="inventory.html" class="sidebar-link">Inventory</a>
+      <a href="manager_sales_report.html?role=manager" class="sidebar-link">Sales Report</a>
+      <a href="customer_management.html?role=manager&amp;mode=view" class="sidebar-link">View Customers</a>
+    </div>
+
+    <div class="sidebar-footer">
+      <a href="login.html" class="sidebar-link">Logout</a>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <span class="welcome-text">Manager Preferences</span>
+      </div>
+      <div class="topbar-right">
+        <div class="profile-circle">
+          <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop" alt="Manager" style="width:100%;height:100%;object-fit:cover;"/>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">Manager Name</div>
+          <div class="profile-role">Manager</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content">
+
+      <!-- Theme Toggle -->
+      <div class="settings-section">
+        <h3><i class="fa-solid fa-moon-stars"></i> Appearance</h3>
+        <div class="theme-toggle">
+          <span>Dark Mode</span>
+          <div id="themeToggle" class="theme-switch">
+            <span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Store Configuration -->
+      <div class="settings-section">
+        <h3><i class="fa-solid fa-store"></i> Store Configuration</h3>
+        <form id="managerSettingsForm" class="settings-form-grid">
+          <div class="form-group">
+            <label>Store Open Hours</label>
+            <input type="time" name="openHours" value="09:00">
+          </div>
+          <div class="form-group">
+            <label>Store Close Hours</label>
+            <input type="time" name="closeHours" value="21:00">
+          </div>
+          <div class="form-group">
+            <label>Daily Sales Target (GHC)</label>
+            <input type="number" name="dailyTarget" value="5000">
+          </div>
+          <button type="submit" class="save-btn">Save Store Preferences</button>
+        </form>
+      </div>
+
+      <!-- Discounts & Reports -->
+      <div class="settings-section">
+        <h3><i class="fa-solid fa-percent"></i> Discounts & Reports</h3>
+        <form class="settings-form-grid">
+          <div class="form-group">
+            <label>Default Discount (%)</label>
+            <input type="number" name="defaultDiscount" value="5" max="50">
+          </div>
+          <div class="form-group">
+            <label>Max Discount per Sale (%)</label>
+            <input type="number" name="maxDiscount" value="20" max="100">
+          </div>
+          <div class="form-group">
+            <label>Default Report Period</label>
+            <select name="reportPeriod">
+              <option>Daily</option>
+              <option>Weekly</option>
+              <option>Monthly</option>
+            </select>
+          </div>
+          <button type="submit" class="save-btn">Save Report Preferences</button>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

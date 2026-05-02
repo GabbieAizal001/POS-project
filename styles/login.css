@@ -1,0 +1,219 @@
+/* Professional Login Page Design with Original Colors */
+
+.sidebar-logo {
+  position: absolute;
+  top: 30px;
+  left: 40px;
+  font-size: 36px;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 10;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #8B9CE4;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+#border {
+    background: #C9CFFD;
+    border: 5px solid white;
+    border-radius: 44px;
+    padding: 40px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+    width: 100%;
+    max-width: 440px;
+    position: relative;
+    z-index: 1;
+}
+
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 16px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    font-size: 16px;
+    font-family: inherit;
+    background: #ffffff;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    margin-bottom: 16px;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: #8B9CE4;
+    box-shadow: 0 0 0 3px rgba(139, 156, 228, 0.1);
+    background: #ffffff;
+}
+
+input[type="text"]::placeholder,
+input[type="password"]::placeholder {
+    color: #a0aec0;
+    font-weight: 400;
+}
+
+#login_btn {
+    width: 100px;
+    padding: 10px;
+    background: white;
+    color: #8B9CE4;
+    border: none;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    margin-left: 180px;
+}
+
+#login_btn:hover {
+    background-color: #8B9CE4;
+    color: white;
+}
+
+#forgot_password {
+    display: block;
+    text-align: center;
+    margin-top: 20px;
+    color: #5873ea;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+#forgot_password:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+/* Original Toggle Switch */
+.switch {
+    display: block;
+    --width-of-switch: 3.5em;
+    --height-of-switch: 2em;
+    --size-of-icon: 1.4em;
+    --slider-offset: 0.3em;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: var(--width-of-switch);
+    height: var(--height-of-switch);
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #f4f4f5;
+    transition: .4s;
+    border-radius: var(--height-of-switch);
+}
+
+.slider:before {
+  position: absolute;
+  
+  content: "";
+  height: var(--size-of-icon,1.4em);
+  width: var(--size-of-icon,1.4em);
+  border-radius: 20px;
+  left: var(--slider-offset,0.3em);
+  top: 50%;
+  transform: translateY(-50%);
+  background: linear-gradient(40deg,#ff0080,#8B9CE4 70%);
+  transition: .4s;
+}
+
+input:checked + .slider:before {
+  left: calc(100% - (var(--size-of-icon,1.4em) + var(--slider-offset,0.3em)));
+  background: #303136;
+  box-shadow: inset -3px -2px 5px -2px #8983f7, inset -10px -4px 0 0 #a3dafb;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    #border {
+        margin: 20px;
+        padding: 30px 20px;
+    }
+
+    .sidebar-logo {
+        left: 20px;
+        font-size: 28px;
+        top: 20px;
+    }
+
+    h1 {
+        font-size: 28px;
+    }
+
+    #login_btn {
+        margin-left: auto;
+        margin-right: auto;
+    }
+}
+
+
+
+ :root {
+  /* Light Mode Colors (Default) */
+  --bg-color: #8B9CE4;
+  --card-bg: #C9CFFD;
+  --text-color: #333;
+  --input-bg: white;
+}
+
+body.dark-mode {
+  /* Dark Mode Colors */
+  --bg-color: #1e1e26;
+  --card-bg: #2d2d3a;
+  --text-color: #f4f4f5;
+  --input-bg: #444;
+}
+
+/* Now, update your existing styles to USE these variables */
+body {
+  background-color: var(--bg-color);
+  transition: background-color 0.4s; /* Makes the fade smooth */
+}
+
+#border {
+  background-color: var(--card-bg);
+  transition: background-color 0.4s;
+  color: var(--text-color);
+}
+#employee_id, #password {
+  background-color: var(--input-bg);
+  color: var(--text-color);
+  /* other existing styles... */
+}
+
+#forgot_password {
+  /* Use a lighter blue for dark mode so it's readable */
+  color: var(--text-color); 
+}
